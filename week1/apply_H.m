@@ -1,7 +1,7 @@
 function J = apply_H(I, H, crop_to_fit)
     switch nargin
       case 2
-          crop_to_fit = false;
+          crop_to_fit = true;
       case 3
       otherwise
         error('Incorrect input parameters')
@@ -19,12 +19,12 @@ function J = apply_H(I, H, crop_to_fit)
     min_y = floor(min(C_H_y));
     max_y = ceil(max(C_H_y));
     if crop_to_fit
-        cols = max([max_y,0]) - min([min_y,0])+1;
-        rows = max([max_x,0]) - min([min_x,0])+1;
-    else
-
         cols = max_y - min_y+1;
         rows = max_x - min_x+1;
+    else
+        cols = max([max_y,0]) - min([min_y,0])+1;
+        rows = max([max_x,0]) - min([min_x,0])+1;
+
     end
     
     % empty destination image
@@ -43,19 +43,19 @@ function J = apply_H(I, H, crop_to_fit)
     % apply inverse homography to all points and separate transformed
     % x and y coords for interp2
     E = H\P';
-    E_y = E(1,:); 
-    E_x = E(2,:);
+    E_y = E(1,:) ./ E(3,:);
+    E_x = E(2,:) ./ E(3,:);
     
     % apply interp2 to each channel in original image
     ID = im2double(I);
     if crop_to_fit
-        J(max(1,min_x):max(1,min_x)+nx-1,max(1,min_y):max(1,min_y)+ny-1,1) = im2uint8( reshape( interp2(ID(:,:,1), E_x, E_y), [nx,ny]) );
-        J(max(1,min_x):max(1,min_x)+nx-1,max(1,min_y):max(1,min_y)+ny-1,2) = im2uint8( reshape( interp2(ID(:,:,2), E_x, E_y), [nx,ny]) );
-        J(max(1,min_x):max(1,min_x)+nx-1,max(1,min_y):max(1,min_y)+ny-1,3) = im2uint8( reshape( interp2(ID(:,:,3), E_x, E_y), [nx,ny]) );
-    else
         J(1:nx,1:ny,1) = im2uint8( reshape( interp2(ID(:,:,1), E_x, E_y), [nx,ny]) );
         J(1:nx,1:ny,2) = im2uint8( reshape( interp2(ID(:,:,2), E_x, E_y), [nx,ny]) );
         J(1:nx,1:ny,3) = im2uint8( reshape( interp2(ID(:,:,3), E_x, E_y), [nx,ny]) );
+    else
+        J(max(1,min_x):max(1,min_x)+nx-1,max(1,min_y):max(1,min_y)+ny-1,1) = im2uint8( reshape( interp2(ID(:,:,1), E_x, E_y), [nx,ny]) );
+        J(max(1,min_x):max(1,min_x)+nx-1,max(1,min_y):max(1,min_y)+ny-1,2) = im2uint8( reshape( interp2(ID(:,:,2), E_x, E_y), [nx,ny]) );
+        J(max(1,min_x):max(1,min_x)+nx-1,max(1,min_y):max(1,min_y)+ny-1,3) = im2uint8( reshape( interp2(ID(:,:,3), E_x, E_y), [nx,ny]) );
     end
   
     
