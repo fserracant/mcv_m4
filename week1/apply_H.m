@@ -57,8 +57,6 @@ function J = apply_H(I, H, crop_to_fit)
         J(1:nx,1:ny,2) = im2uint8( reshape( interp2(ID(:,:,2), E_x, E_y), [nx,ny]) );
         J(1:nx,1:ny,3) = im2uint8( reshape( interp2(ID(:,:,3), E_x, E_y), [nx,ny]) );
     end
-
-    imshow(uint8(J));
-    
+  
     
 end
