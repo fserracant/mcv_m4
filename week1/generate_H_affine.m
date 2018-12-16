@@ -13,7 +13,7 @@ function H = generate_H_affine(theta, phi, lambda1, lambda2, t_x, t_y)
 % Compute rotation matrices (R)
 R_theta = [cos(theta), -sin(theta); sin(theta), cos(theta)];
 R_phi = [cos(phi), -sin(phi); sin(phi), cos(phi)];
-R_phi_minus = [-cos(phi), -sin(phi); -sin(phi), cos(phi)];
+R_phi_minus = [cos(phi), sin(phi); -sin(phi), cos(phi)];
 
 % Compute diagonal matrix (D)
 D = diag([lambda1, lambda2]);
