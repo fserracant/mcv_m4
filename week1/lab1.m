@@ -44,37 +44,28 @@ t_x = 0; t_y = 0;
 
 H = generate_H_affine(theta, phi, lambda1, lambda2, t_x, t_y);
 
-
-
-I2 = apply_H(I, H);
-figure; imshow(I); figure; imshow(uint8(I2));
+I_trans = apply_H(I, H);
+figure(3); subplot(1,2,1);
+imshow(uint8(I_trans)); title('Affine transformation')
 
 % ToDo: decompose the affinity in four transformations: two
 % rotations, a scale, and a translation
 [rotation1, rotation2, scale, translation] = decompose_H_affine(H);
 
-
-
 % ToDo: verify that the product of the four previous transformations
 % produces the same matrix H as above
-
 H_comp = translation * rotation2 * rotation1' * scale * rotation1;
 assert(verify_product_H_affine(H, H_comp), 'H matrices not equal');
 
 % ToDo: verify that the proper sequence of the four previous
 % transformations over the image I produces the same image I2 as before
-
 I_comp = uint8(apply_H(I,rotation1));
 I_comp = uint8(apply_H(I_comp,scale));
 I_comp = uint8(apply_H(I_comp,rotation2 * rotation1'));
 I_comp = apply_H(I_comp,translation);
 
-
-figure; imshow(uint8(I2));figure; imshow(uint8(I_comp));
-
-%assert(verify_images(I2, I_comp), 'Result images not equal');
-
-
+subplot(1,2,2);
+imshow(uint8(I_comp)); title('Affine transformation decomposed')
 
 %% 1.3 Projective transformations (homographies)
 
