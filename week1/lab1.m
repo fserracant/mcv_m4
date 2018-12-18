@@ -1,12 +1,13 @@
 curdir = matlab.desktop.editor.getActive;
 cd(fileparts(curdir.Filename))
+close all;
+clear;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 1: Image rectification
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Applying image transformations
-
 % ToDo: create the function  "apply_H" that gets as input a homography and
 % an image and returns the image transformed by the homography.
 % The size of the transformed image has to be automatically set so as to 
@@ -14,26 +15,27 @@ cd(fileparts(curdir.Filename))
 % At some point you will need to interpolate the image values at some points,
 % you may use the Matlab function "interp2" for that.
 
+% Load image
+I=imread('Data/0005_s.png');
 
 %% 1.1. Similarities
-close all;
-clear;
-I=imread('Data/0005_s.png'); % we have to be in the proper folder
-
 % ToDo: generate a matrix H which produces a similarity transformation
 s = 0.5;
 theta = pi/4;
 t_x = 0; t_y = 0;
 H = [s*cos(theta) s*-sin(theta) t_x; s*sin(theta) s*cos(theta) t_y; 0 0 1];
+I_trans = apply_H(I, H);
 
-I2 = apply_H(I, H);
-figure; imshow(I); figure; imshow(uint8(I2));
+figure(1); subplot(1,2,1);
+imshow(I); 
+title('Original');
 
+subplot(1,2,2);
+imshow(uint8(I_trans)); 
+title('Similarity (scale and rotation) transformation');
 
 %% 1.2. Affinities
-
 % ToDo: generate a matrix H which produces an affine transformation
-
 lambda1 = 1;
 lambda2 = 0.5;
 theta =pi/4;
