@@ -68,7 +68,6 @@ subplot(1,2,2);
 imshow(uint8(I_comp)); title('Affine transformation decomposed')
 
 %% 1.3 Projective transformations (homographies)
-
 % ToDo: generate a matrix H which produces a projective transformation
 lambda1 = 1;
 lambda2 = 0.5;
@@ -76,11 +75,14 @@ theta =pi/4;
 phi = pi/4;
 t_x = 0; t_y = 0;
 v = [0.000075, -0.0005];
-Hp = generate_H_projective(theta, phi, lambda1, lambda2, t_x, t_y, v)
+Hp = generate_H_projective(theta, phi, lambda1, lambda2, t_x, t_y, v);
+I_trans = apply_H(I, Hp);
 
-
-I2 = apply_H(I, Hp);
-figure; imshow(I); figure; imshow(uint8(I2));
+figure(4); 
+subplot(1,2,1); 
+imshow(I); title('Original');
+subplot(1,2,2);
+imshow(uint8(I_trans)); title('Projective transformation');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
@@ -134,8 +136,8 @@ l_inf = l_inf / l_inf(3)
 
 % define H for affine rectification and apply to image
 H = [1 0 0; 0 1 0; l_inf(1) l_inf(2) 1];
-I2 = apply_H(I, H);
-figure; imshow(uint8(I2));
+I_trans = apply_H(I, H);
+figure; imshow(uint8(I_trans));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 % by using l' = H^(-T) * l
