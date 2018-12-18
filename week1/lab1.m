@@ -86,9 +86,8 @@ imshow(uint8(I_trans)); title('Projective transformation');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
-
-% choose the image points
-I=imread('Data/0000_s.png');
+% Load image and points
+I = imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
 % crop the image to get only right facade
@@ -117,27 +116,28 @@ l3 = create_line(p5, p6); l3 = l3 / l3(3);
 l4 = create_line(p7, p8); l4 = l4 / l4(3);
 
 % show the chosen lines in the image
-figure;imshow(I);
+figure(5); subplot(1,2,1); imshow(I); title('Original');
 hold on;
 t=1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
 plot(t, -(l2(1)*t + l2(3)) / l2(2), 'y');
-plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
-plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
+plot(t, -(l3(1)*t + l3(3)) / l3(2), 'r');
+plot(t, -(l4(1)*t + l4(3)) / l4(2), 'r');
 
 % ToDo: compute the homography that affinely rectifies the image
 % compute vanishing points where lines cross at ininity
-v1 = cross(l1, l2)
-v2 = cross(l3, l4)
+v1 = cross(l1, l2);
+v2 = cross(l3, l4);
 
 % compute line that passes through vanishing points: line at infinite 
 l_inf = cross(v1, v2); 
-l_inf = l_inf / l_inf(3)
+l_inf = l_inf / l_inf(3);
 
 % define H for affine rectification and apply to image
 H = [1 0 0; 0 1 0; l_inf(1) l_inf(2) 1];
 I_trans = apply_H(I, H);
-figure; imshow(uint8(I_trans));
+subplot(1,2,2);
+imshow(uint8(I_trans)); title('Affine rectification');
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
 % by using l' = H^(-T) * l
@@ -147,17 +147,15 @@ lr3 = H' \ l3; lr3 = lr3 / lr3(3);
 lr4 = H' \ l4; lr4 = lr4 / lr4(3);
 
 % show the transformed lines in the transformed image
-figure;imshow(uint8(I2));
 hold on;
 t=1:0.1:1000;
 plot(t, -(lr1(1)*t + lr1(3)) / lr1(2), 'y');
 plot(t, -(lr2(1)*t + lr2(3)) / lr2(2), 'y');
-plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'y');
-plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
+plot(t, -(lr3(1)*t + lr3(3)) / lr3(2), 'r');
+plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'r');
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
-
 % calculate slopes of original lines
 s1 = l1(1) / l1(2); 
 s2 = l2(1) / l2(2);
@@ -170,12 +168,14 @@ sr3 = lr3(1) / lr3(2);
 sr4 = lr4(1) / lr4(2);
 
 % angles between "parallel" original lines
-a12 = rad2deg( atan(s1) - atan(s2) ) % a12 = 0.0992
-a34 = rad2deg( atan(s3) - atan(s4) ) % a34 = -1.3435
+a12 = rad2deg( atan(s1) - atan(s2) ); % a12 = 0.0992
+a34 = rad2deg( atan(s3) - atan(s4) ); % a34 = -1.3435
+sprintf('Angles between yellow and red lines %f, %f', a12, a34)
 % angles of really parallel rectified lines
-ar12 = rad2deg( atan(sr1) - atan(sr2) ) % ar12 = -7.9514e-16 (almost 0)
-ar34 = rad2deg( atan(sr3) - atan(sr4) ) % ar34 = 0
-
+ar12 = rad2deg( atan(sr1) - atan(sr2) ); % ar12 = -7.9514e-16 (almost 0)
+ar34 = rad2deg( atan(sr3) - atan(sr4) ); % ar34 = 0
+sprintf('Angles between yellow and red lines (after rectification) %f, %f', ...
+  ar12, ar34)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Metric Rectification
