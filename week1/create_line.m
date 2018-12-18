@@ -8,6 +8,9 @@ function [line] = create_line(point1, point2)
 
   line = cross(point1,point2);
 
-  assert(dot(line,point1)==0 & dot(line,point2)==0, ...
+  % allow some tolerance because some numbers are not exactly zero but very low
+  % instead
+  tol = 1e-6;
+  assert(dot(line,point1) < tol & dot(line,point2) < tol, ...
    'Bug: computed line is not perpendicular to given points')
 end
