@@ -90,27 +90,34 @@ figure; imshow(I); figure; imshow(uint8(I2));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
 
-
 % choose the image points
 I=imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
+% crop the image to get only right facade
+col_crop = 270;
+[cols,rows] = size(I);
+I = I(:,col_crop:cols,:);
+
 % indices of lines
 i = 424;
-p1 = [A(i,1) A(i,2) 1]';
-p2 = [A(i,3) A(i,4) 1]';
+p1 = [A(i,1)-col_crop A(i,2) 1]';
+p2 = [A(i,3)-col_crop A(i,4) 1]';
 i = 240;
-p3 = [A(i,1) A(i,2) 1]';
-p4 = [A(i,3) A(i,4) 1]';
+p3 = [A(i,1)-col_crop A(i,2) 1]';
+p4 = [A(i,3)-col_crop A(i,4) 1]';
 i = 712;
-p5 = [A(i,1) A(i,2) 1]';
-p6 = [A(i,3) A(i,4) 1]';
+p5 = [A(i,1)-col_crop A(i,2) 1]';
+p6 = [A(i,3)-col_crop A(i,4) 1]';
 i = 565;
-p7 = [A(i,1) A(i,2) 1]';
-p8 = [A(i,3) A(i,4) 1]';
+p7 = [A(i,1)-col_crop A(i,2) 1]';
+p8 = [A(i,3)-col_crop A(i,4) 1]';
 
 % ToDo: compute the lines l1, l2, l3, l4, that pass through the different pairs of points
-
+l1 = create_line(p1, p2); l1 = l1 / l1(3);
+l2 = create_line(p3, p4); l2 = l2 / l2(3);
+l3 = create_line(p5, p6); l3 = l3 / l3(3);
+l4 = create_line(p7, p8); l4 = l4 / l4(3);
 
 % show the chosen lines in the image
 figure;imshow(I);
@@ -122,11 +129,25 @@ plot(t, -(l3(1)*t + l3(3)) / l3(2), 'y');
 plot(t, -(l4(1)*t + l4(3)) / l4(2), 'y');
 
 % ToDo: compute the homography that affinely rectifies the image
+% compute vanishing points where lines cross at ininity
+v1 = cross(l1, l2)
+v2 = cross(l3, l4)
 
+% compute line that passes through vanishing points: line at infinite 
+l_inf = cross(v1, v2); 
+l_inf = l_inf / l_inf(3)
+
+% define H for affine rectification and apply to image
+H = [1 0 0; 0 1 0; l_inf(1) l_inf(2) 1];
 I2 = apply_H(I, H);
 figure; imshow(uint8(I2));
 
 % ToDo: compute the transformed lines lr1, lr2, lr3, lr4
+% by using l' = H^(-T) * l
+lr1 = H' \ l1; lr1 = lr1 / lr1(3);
+lr2 = H' \ l2; lr2 = lr2 / lr2(3);
+lr3 = H' \ l3; lr3 = lr3 / lr3(3);
+lr4 = H' \ l4; lr4 = lr4 / lr4(3);
 
 % show the transformed lines in the transformed image
 figure;imshow(uint8(I2));
@@ -139,6 +160,24 @@ plot(t, -(lr4(1)*t + lr4(3)) / lr4(2), 'y');
 
 % ToDo: to evaluate the results, compute the angle between the different pair 
 % of lines before and after the image transformation
+
+% calculate slopes of original lines
+s1 = l1(1) / l1(2); 
+s2 = l2(1) / l2(2);
+s3 = l3(1) / l3(2);
+s4 = l4(1) / l4(2);
+% calculate slope of rectified lines
+sr1 = lr1(1) / lr1(2); 
+sr2 = lr2(1) / lr2(2);
+sr3 = lr3(1) / lr3(2);
+sr4 = lr4(1) / lr4(2);
+
+% angles between "parallel" original lines
+a12 = rad2deg( atan(s1) - atan(s2) ) % a12 = 0.0992
+a34 = rad2deg( atan(s3) - atan(s4) ) % a34 = -1.3435
+% angles of really parallel rectified lines
+ar12 = rad2deg( atan(sr1) - atan(sr2) ) % ar12 = -7.9514e-16 (almost 0)
+ar34 = rad2deg( atan(sr3) - atan(sr4) ) % ar34 = 0
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
