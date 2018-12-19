@@ -87,6 +87,7 @@ imshow(uint8(I_trans)); title('Projective transformation');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine Rectification
 % Load image and points
+clear;
 I = imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
@@ -188,6 +189,7 @@ sprintf('Angles between yellow and red lines (after rectification) %f, %f', ...
 %       rectification.
 
 % Load image and points
+clear;
 I = imread('Data/0000_s.png');
 A = load('Data/0000_s_info_lines.txt');
 
@@ -326,10 +328,11 @@ plot(t, -(m2r(1)*t + m2r(3)) / m2r(2), 'r');
 %       Crop the initial image so that only the left facade is visible.
 %       Show the (properly) transformed lines that use in every step.
 % Load image and points
+clear;
 I = imread('Data/0001_s.png');
 A = load('Data/0001_s_info_lines.txt');
 
-% crop the image to get only right facade
+% crop the image to get only left facade
 I = I(:,1:470,:); 
 
 % indices of lines
@@ -354,7 +357,7 @@ l3 = create_line(p5, p6); l3 = l3 / l3(3);
 l4 = create_line(p7, p8); l4 = l4 / l4(3);
 
 % show the chosen lines in the image
-figure(6); subplot(1,3,1); imshow(I); title('Original');
+figure(7); subplot(1,3,1); imshow(I); title('Original');
 hold on;
 t=1:0.1:1000;
 plot(t, -(l1(1)*t + l1(3)) / l1(2), 'y');
@@ -427,7 +430,7 @@ A = [ l1(1)*m1(1), l1(1)*m1(2)+l1(2)*m1(1), l1(2)*m1(2);
 % A = [l1(1)*m1(1),   l1(1)*m1(2)+l1(2)*m1(1),    l1(2)*m1(2)];
 
 s = null(A);
-S = [ -s(1,2), s(2,2); s(2,2), s(3,2) ] / s(3,2);
+S = [ s(1,2), s(2,2); s(2,2), s(3,2) ] / s(3,2);
 
 % Apply Cholesky factorization
 K = chol(S); 
