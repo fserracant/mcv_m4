@@ -12,9 +12,9 @@ imargb = imread('Data/llanes/llanes_a.jpg');
 imbrgb = imread('Data/llanes/llanes_b.jpg');
 imcrgb = imread('Data/llanes/llanes_c.jpg');
 
-imargb = imread('Data/castle_int/0016_s.png');
-imbrgb = imread('Data/castle_int/0015_s.png');
-imcrgb = imread('Data/castle_int/0014_s.png');
+% imargb = imread('Data/castle_int/0016_s.png');
+% imbrgb = imread('Data/castle_int/0015_s.png');
+% imcrgb = imread('Data/castle_int/0014_s.png');
 
 % imargb = imread('Data/aerial/site13/frame00000.png');
 % imbrgb = imread('Data/aerial/site13/frame00002.png');
@@ -92,9 +92,9 @@ vgg_gui_H(imbrgb, imcrgb, Hbc);
 %% 3. Build the mosaic
 
 corners = [-400 1200 -100 650];
-iwb = apply_H_v2(imbrgb, ?? , corners);   % ToDo: complete the call to the function
-iwa = apply_H_v2(imargb, ??, corners);    % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, ??, corners);    % ToDo: complete the call to the function
+% iwb = apply_H_v2(imbrgb, ?? , corners);   % ToDo: complete the call to the function
+% iwa = apply_H_v2(imargb, ??, corners);    % ToDo: complete the call to the function
+% iwc = apply_H_v2(imcrgb, ??, corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
@@ -111,8 +111,8 @@ title('Mosaic A-B-C');
 
 % Homography ab
 
-x = ...;  %ToDo: set the non-homogeneous point coordinates of the 
-xp = ...; %      point correspondences we will refine with the geometric method
+% x = ...;  %ToDo: set the non-homogeneous point coordinates of the 
+% xp = ...; %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
 
@@ -173,9 +173,9 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 
 %% Build mosaic
 corners = [-400 1200 -100 650];
-iwb = apply_H_v2(imbrgb, ??, corners); % ToDo: complete the call to the function
-iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
-iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
+% iwb = apply_H_v2(imbrgb, ??, corners); % ToDo: complete the call to the function
+% iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
+% iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
@@ -237,11 +237,11 @@ end
 
 %% Compute the Image of the Absolute Conic
 
-w = ... % ToDo
+% w = ... % ToDo
  
 %% Recover the camera calibration.
 
-K = ... % ToDo
+% K = ... % ToDo
     
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
@@ -253,9 +253,9 @@ P = cell(N,1);
 figure;hold;
 for i = 1:N
     % ToDo: compute r1, r2, and t{i}
-    r1 = ...
-    r2 = ...
-    t{i} = ...
+%     r1 = ...
+%     r2 = ...
+%     t{i} = ...
     
     % Solve the scale ambiguity by forcing r1 and r2 to be unit vectors.
     s = sqrt(norm(r1) * norm(r2)) * sign(t{i}(3));
@@ -292,9 +292,9 @@ figure; hold;
 plot_camera(K * eye(3,4), 800, 600, 200);
 % ToDo: complete the call to the following function with the proper
 %       coordinates of the image corners in the new reference system
-for i = 1:N
-    vgg_scatter_plot( [...   ...   ...   ...   ...], 'r');
-end
+% for i = 1:N
+%     vgg_scatter_plot( [...   ...   ...   ...   ...], 'r');
+% end
 
 %% Augmented reality: Plot some 3D points on every camera.
 [Th, Tw] = size(Tg);
