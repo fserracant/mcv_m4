@@ -35,3 +35,7 @@ H_tilde = reshape(h, 3, 3);
 %% Step 4: undo the translation and the scaling
 % Denormalise => H = inv(T_x2) * H_tilde * T_x1
 H = T_x2 \ H_tilde * T_x1;
+
+% Normalise H (up to a factor)
+% E.g.: divide everything by H(3,3)
+H = H / H(end,end);
