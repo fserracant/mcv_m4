@@ -70,8 +70,8 @@ if strcmp(action,'start'),
    h2=image(i2); hold on; title('Image 2');
    set(h2, 'ButtonDownFcn','vgg_gui_H(''b2'');');
 
-   point=plot(-1000, -1000,'EraseMode','xor');
-   point2=plot(-1000, -1000,'EraseMode','xor');
+   point=plot(-1000, -1000);
+   point2=plot(-1000, -1000);
 
    s1=size(i1); s2=size(i2);
    t(:,:,1)=H;  t(:,:,2)=inv(H);  H=t;
@@ -108,12 +108,10 @@ elseif action(1)=='b'
    delete(ud.p2);
    axes(ud.ah(ud.current));
    ud.p=plot(pt(1,1), pt(1,2), [ud.color '+'], ...
-	     'MarkerSize', 8+2*ud.size, 'LineWidth', ud.size,...
-	     'EraseMode','xor');
+	     'MarkerSize', 8+2*ud.size, 'LineWidth', ud.size);
    axes(ud.ah(3-ud.current));
    ud.p2=plot(p2(1,1), p2(2,1), [ud.color '+'], ...
-	     'MarkerSize', 8+2*ud.size, 'LineWidth', ud.size,...
-	     'EraseMode','xor');
+	     'MarkerSize', 8+2*ud.size, 'LineWidth', ud.size);
 
 elseif action(1)=='c'
    ud.color=action(2);
