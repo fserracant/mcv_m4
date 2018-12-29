@@ -4,9 +4,9 @@ function I = compute_mosaic(imargb, imbrgb, imcrgb, threshold, norm, showfigures
         imb = sum(double(imbrgb), 3) / 3 / 255;
         imc = sum(double(imcrgb), 3) / 3 / 255;
     else
-        ima = imargb;
-        imb = imbrgb;
-        imc = imcrgb;
+        ima = imargb/255;
+        imb = imbrgb/255;
+        imc = imcrgb/255;
     end
     
     %% Compute SIFT keypoints

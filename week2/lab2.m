@@ -123,9 +123,9 @@ imshow(compute_mosaic(imargb, imbrgb, imcrgb, 0.01, true, false));
 title('Site13 Mosaic A-B-C');
 
 % ToDo: compute the mosaic with aerial images set 22
-imargb = double(imread('Data/aerial/site22/frame_00001.tif'))/255;
-imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'))/255;
-imcrgb = double(imread('Data/aerial/site22/frame_00030.tif'))/255;
+imargb = double(imread('Data/aerial/site22/frame_00001.tif'));
+imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'));
+imcrgb = double(imread('Data/aerial/site22/frame_00030.tif'));
 figure;
 imshow(compute_mosaic(imargb, imbrgb, imcrgb, 0.05, false, false));
 title('Site22 Mosaic A-B-C');
