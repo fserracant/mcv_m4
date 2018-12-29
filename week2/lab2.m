@@ -38,15 +38,15 @@ imc = sum(double(imcrgb), 3) / 3 / 255;
 [points_b, desc_b] = sift(imb, 'Threshold', 0.01);
 [points_c, desc_c] = sift(imc, 'Threshold', 0.01);
 
-figure;
+figure(1);
 imshow(imargb);%image(imargb)
 hold on;
 plot(points_a(1,:), points_a(2,:),'+y');
-figure;
+figure(2);
 imshow(imbrgb);%image(imbrgb);
 hold on;
 plot(points_b(1,:), points_b(2,:),'+y');
-figure;
+figure(3);
 imshow(imcrgb);%image(imcrgb);
 hold on;
 plot(points_c(1,:), points_c(2,:),'+y');
@@ -55,12 +55,12 @@ plot(points_c(1,:), points_c(2,:),'+y');
 
 % between a and b
 matches_ab = siftmatch(desc_a, desc_b);
-figure;
+figure(4);
 plotmatches(ima, imb, points_a(1:2,:), points_b(1:2,:), matches_ab, 'Stacking', 'v');
 
 % between b and c
 matches_bc = siftmatch(desc_b, desc_c);
-figure;
+figure(5);
 plotmatches(imb, imc, points_b(1:2,:), points_c(1:2,:), matches_bc, 'Stacking', 'v');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,7 +72,7 @@ xab_a = [points_a(1:2, matches_ab(1,:)); ones(1, length(matches_ab))];
 xab_b = [points_b(1:2, matches_ab(2,:)); ones(1, length(matches_ab))];
 [Hab, inliers_ab] = ransac_homography_adaptive_loop(xab_a, xab_b, th, 1000); % ToDo: complete this function
 
-figure;
+figure(6);
 plotmatches(ima, imb, points_a(1:2,:), points_b(1:2,:), ...
     matches_ab(:,inliers_ab), 'Stacking', 'v');
 
@@ -84,7 +84,7 @@ xbc_b = [points_b(1:2, matches_bc(1,:)); ones(1, length(matches_bc))];
 xbc_c = [points_c(1:2, matches_bc(2,:)); ones(1, length(matches_bc))];
 [Hbc, inliers_bc] = ransac_homography_adaptive_loop(xbc_b, xbc_c, th, 1000); 
 
-figure;
+figure(7);
 plotmatches(imb, imc, points_b(1:2,:), points_c(1:2,:), ...
     matches_bc(:,inliers_bc), 'Stacking', 'v');
 
@@ -98,7 +98,7 @@ iwb = apply_H_v2(imbrgb, eye(3), corners);   % ToDo: complete the call to the fu
 iwa = apply_H_v2(imargb, Hab, corners);    % ToDo: complete the call to the function
 iwc = apply_H_v2(imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
-figure;
+figure(8);
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
 
@@ -164,13 +164,13 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 
-figure;
+figure(9);
 imshow(imargb);%image(imargb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
 
-figure;
+figure(10);
 imshow(imbrgb);%image(imbrgb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
@@ -186,13 +186,13 @@ plot(xhatp(1,:), xhatp(2,:),'+c');
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 
-figure;
+figure(11);
 imshow(imbrgb);%image(imbrgb);
 hold on;
 plot(x(1,:), x(2,:),'+y');
 plot(xhat(1,:), xhat(2,:),'+c');
 
-figure;
+figure(12);
 imshow(imcrgb);%image(imcrgb);
 hold on;
 plot(xp(1,:), xp(2,:),'+y');
@@ -204,7 +204,7 @@ corners = [-400 1200 -100 650];
 % iwa = apply_H_v2(imargb, ??, corners); % ToDo: complete the call to the function
 % iwc = apply_H_v2(imcrgb, ??, corners); % ToDo: complete the call to the function
 
-figure;
+figure(13);
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
 
@@ -277,7 +277,7 @@ end
 R = cell(N,1);
 t = cell(N,1);
 P = cell(N,1);
-figure;hold;
+figure(15);hold;
 for i = 1:N
     % ToDo: compute r1, r2, and t{i}
 %     r1 = ...
@@ -315,7 +315,7 @@ colormap(gray);
 axis equal;
 
 %% Plot a static camera with moving calibration pattern.
-figure; hold;
+figure(16); hold;
 plot_camera(K * eye(3,4), 800, 600, 200);
 % ToDo: complete the call to the following function with the proper
 %       coordinates of the image corners in the new reference system
