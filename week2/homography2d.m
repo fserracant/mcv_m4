@@ -38,4 +38,4 @@ H_tilde = reshape(h, 3, 3);
 H_tilde = H_tilde / H_tilde(end,end);
 
 % Denormalise => H = inv(T_x2) * H_tilde * T_x1
-H = T_x2 \ H_tilde * T_x1;
+H = T_x2 \ H_tilde' * T_x1;
