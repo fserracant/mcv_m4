@@ -30,13 +30,11 @@ switch computer
     error(['Unsupported architecture ', computer, '. Please edit this M-file to fix the issue.']) ;
 end
 
+opts = {opts{:}, '-compatibleArrayDims' } ;
+
 mex('imsmooth.c',opts{:}) ;
 mex('siftlocalmax.c',opts{:}) ;
 mex('siftrefinemx.c',opts{:}) ;
 mex('siftormx.c',opts{:}) ;
 mex('siftdescriptor.c',opts{:}) ;
 mex('siftmatch.c',opts{:}) ;
-
-
-
-
