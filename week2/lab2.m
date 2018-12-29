@@ -138,14 +138,16 @@ title('Site22 Mosaic A-B-C');
 
 % Homography ab
 
-% x = ...;  %ToDo: set the non-homogeneous point coordinates of the 
-% xp = ...; %      point correspondences we will refine with the geometric method
-Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
-P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
+x = points_a(1:2, matches_ab(1,inliers_ab));  % ToDo: set the non-homogeneous point coordinates of the 
+xp = points_b(1:2, matches_ab(2,inliers_ab)); % point correspondences we will refine with the geometric method
 
-Y_initial = gs_errfunction( P0, Xobs ); % ToDo: create this function that we need to pass to the lsqnonlin function
+Xobs = [ x(:) ; xp(:) ];    % The column vector of observed values (x and x')
+P0 = [ Hab(:) ; x(:) ];     % The parameters or independent variables
+
+% ToDo: create this function that we need to pass to the lsqnonlin function
 % NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
 % (E(X) is summed and squared implicitly in the lsqnonlin algorithm.) 
+Y_initial = gs_errfunction( P0, Xobs );
 err_initial = sum( sum( Y_initial.^2 ));
 
 options = optimset('Algorithm', 'levenberg-marquardt');
