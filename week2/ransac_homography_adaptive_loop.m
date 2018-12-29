@@ -7,7 +7,18 @@ it = 0;
 best_inliers = [];
 while it < max_it
     
-    points = randomsample(Npoints, 4);
+    %points = randomsample(Npoints, 4);
+    uniqueKeypoints = false;
+    while (~uniqueKeypoints)
+        points = randomsample(Npoints, 4);
+        [~,uniquex1,~]=unique(x1(:,points)','rows','stable');
+        [~,uniquex2,~]=unique(x2(:,points)','rows','stable');
+        s1 = size(uniquex1); 
+        s2 = size(uniquex2);
+        if (s1(1)==4 && s2(1) == 4)
+            uniqueKeypoints = true;
+        end    
+    end
     H = homography2d(x1(:,points), x2(:,points)); % ToDo: you have to create this function
     inliers = compute_inliers(H, x1, x2, th);
     

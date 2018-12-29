@@ -2,6 +2,8 @@
 %% Lab 2: Image mosaics
 
 addpath('sift');
+clear;
+close all;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute image correspondences
@@ -15,18 +17,18 @@ imcrgb = imread('Data/llanes/llanes_c.jpg');
 % imargb = imread('Data/castle_int/0016_s.png');
 % imbrgb = imread('Data/castle_int/0015_s.png');
 % imcrgb = imread('Data/castle_int/0014_s.png');
-
+% 
 % imargb = imread('Data/aerial/site13/frame00000.png');
 % imbrgb = imread('Data/aerial/site13/frame00002.png');
 % imcrgb = imread('Data/aerial/site13/frame00003.png');
-
+% 
 ima = sum(double(imargb), 3) / 3 / 255;
 imb = sum(double(imbrgb), 3) / 3 / 255;
 imc = sum(double(imcrgb), 3) / 3 / 255;
 
-% imargb = double(imread('Data/aerial/site22/frame_00001.tif'));
-% imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'));
-% imcrgb = double(imread('Data/aerial/site22/frame_00030.tif'));
+% imargb = double(imread('Data/aerial/site22/frame_00001.tif'))/255;
+% imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'))/255;
+% imcrgb = double(imread('Data/aerial/site22/frame_00030.tif'))/255;
 % ima = imargb;
 % imb = imbrgb;
 % imc = imcrgb;
@@ -92,17 +94,42 @@ vgg_gui_H(imbrgb, imcrgb, Hbc);
 %% 3. Build the mosaic
 
 corners = [-400 1200 -100 650];
-% iwb = apply_H_v2(imbrgb, ?? , corners);   % ToDo: complete the call to the function
-% iwa = apply_H_v2(imargb, ??, corners);    % ToDo: complete the call to the function
-% iwc = apply_H_v2(imcrgb, ??, corners);    % ToDo: complete the call to the function
+iwb = apply_H_v2(imbrgb, eye(3), corners);   % ToDo: complete the call to the function
+iwa = apply_H_v2(imargb, Hab, corners);    % ToDo: complete the call to the function
+iwc = apply_H_v2(imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
 figure;
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
 
+% In order to reuse code, we created a function compute_mosaic
+% of three images with the code from points 1 and 2
+
 % ToDo: compute the mosaic with castle_int images
+imargb = imread('Data/castle_int/0016_s.png');
+imbrgb = imread('Data/castle_int/0015_s.png');
+imcrgb = imread('Data/castle_int/0014_s.png');
+mosaic = compute_mosaic(imargb, imbrgb, imcrgb, 0.01, true, false);
+figure;
+imshow(mosaic);
+title('Castle Mosaic A-B-C');
+
 % ToDo: compute the mosaic with aerial images set 13
+imargb = imread('Data/aerial/site13/frame00000.png');
+imbrgb = imread('Data/aerial/site13/frame00002.png');
+imcrgb = imread('Data/aerial/site13/frame00003.png');
+figure;
+imshow(compute_mosaic(imargb, imbrgb, imcrgb, 0.01, true, false));
+title('Site13 Mosaic A-B-C');
+
 % ToDo: compute the mosaic with aerial images set 22
+imargb = double(imread('Data/aerial/site22/frame_00001.tif'))/255;
+imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'))/255;
+imcrgb = double(imread('Data/aerial/site22/frame_00030.tif'))/255;
+figure;
+imshow(compute_mosaic(imargb, imbrgb, imcrgb, 0.05, false, false));
+title('Site22 Mosaic A-B-C');
+
 % ToDo: comment the results in every of the four cases: say why it works or
 %       does not work
 
