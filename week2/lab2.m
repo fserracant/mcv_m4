@@ -162,6 +162,7 @@ err_final = sum( sum( f.^2 ));
 
 % we show the geometric error before and after the refinement
 fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err_final);
+fprintf(1, 'Error has been reduced %f times\n', err_initial/err_final);
 
 
 %% See differences in the keypoint locations
