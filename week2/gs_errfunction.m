@@ -3,9 +3,12 @@ function E = gs_errfunction(P0, Xobs)
     x = [Xobs(:, 1:size(Xobs,2)/2); ones(1,size(Xobs,2)/2)];
     xp = [Xobs(:, size(Xobs,2)/2+1:end); ones(1,size(Xobs,2)/2)];
     H  = reshape(P0(1:9),3,3);
-    
-    d1 = computeEuclideanDistance (x,H\xp);
-    d2 = computeEuclideanDistance (xp,H*x);
+    xhat = [reshape(P0(9+1:end),2,[]);ones(1,size(Xobs,2)/2)];
+    xhatp = H*xhat;
+     
+
+    d1 = computeEuclideanDistance (x,xhat);
+    d2 = computeEuclideanDistance (xp,xhatp);
     E = [d1, d2];
 end
 

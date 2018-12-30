@@ -11,17 +11,17 @@ close all;
 %% Open images
 
 fprintf(1, 'Opening images\n');
-imargb = imread('Data/llanes/llanes_a.jpg');
-imbrgb = imread('Data/llanes/llanes_b.jpg');
-imcrgb = imread('Data/llanes/llanes_c.jpg');
+% imargb = imread('Data/llanes/llanes_a.jpg');
+% imbrgb = imread('Data/llanes/llanes_b.jpg');
+% imcrgb = imread('Data/llanes/llanes_c.jpg');
 
-% imargb = imread('Data/castle_int/0016_s.png');
-% imbrgb = imread('Data/castle_int/0015_s.png');
-% imcrgb = imread('Data/castle_int/0014_s.png');
+imargb = imread('Data/castle_int/0016_s.png');
+imbrgb = imread('Data/castle_int/0015_s.png');
+imcrgb = imread('Data/castle_int/0014_s.png');
 
-% imargb = imread('Data/aerial/site13/frame00000.png');
-% imbrgb = imread('Data/aerial/site13/frame00002.png');
-% imcrgb = imread('Data/aerial/site13/frame00003.png');
+imargb = imread('Data/aerial/site13/frame00000.png');
+imbrgb = imread('Data/aerial/site13/frame00002.png');
+imcrgb = imread('Data/aerial/site13/frame00003.png');
  
 ima = sum(double(imargb), 3) / 3 / 255;
 imb = sum(double(imbrgb), 3) / 3 / 255;
@@ -179,8 +179,8 @@ fprintf(1, 'Error has been reduced %f times\n', err_initial/err_final);
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 
-xhat = Hab_r\[xp;ones(1,length(xp))];
-xhatp = Hab_r*[x;ones(1,length(x))];
+xhat = [reshape(P(9+1:end),2,[]);ones(1,length(x))];
+xhatp = Hab_r*xhat;
 
 figure;
 imshow(imargb);%image(imargb);
@@ -212,7 +212,7 @@ Y_initial = gs_errfunction(P0, Xobs); % ToDo: create this function that we need 
 % (E(X) is summed and squared implicitly in the lsqnonlin algorithm.) 
 err_initial = sum( sum( Y_initial.^2 ));
 
-options = optimset('Algorithm', 'levenberg-marquardt');
+options = optimset('Algorithm', 'levenberg-marquardt', 'Diagnostics', 'on', 'Display', 'iter');
 P = lsqnonlin(@(t) gs_errfunction(t, Xobs), P0, [], [], options);
 
 Hbc_r = reshape( P(1:9), 3, 3 );
@@ -227,8 +227,8 @@ fprintf(1, 'Gold standard reproj error initial %f, final %f\n', err_initial, err
 % ToDo: compute the points xhat and xhatp which are the correspondences
 % returned by the refinement with the Gold Standard algorithm
 
-xhat = Hbc_r\[xp;ones(1,length(xp))];
-xhatp = Hbc_r*[x;ones(1,length(x))];
+xhat = [reshape(P(9+1:end),2,[]);ones(1,length(x))];
+xhatp = Hbc_r*xhat;
 
 figure;
 imshow(imbrgb);%image(imbrgb);
