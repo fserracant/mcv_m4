@@ -34,6 +34,9 @@ imc = sum(double(imcrgb), 3) / 3 / 255;
 % imc = imcrgb;
 
 %% Compute SIFT keypoints
+% From 'sift' doc: Note that the X,Y center coordinates are (0,0) based, 
+% contrary to the standard MATLAB convention that uses (1,1) as the 
+% top-left image coordiante
 [points_a, desc_a] = sift(ima, 'Threshold', 0.01);
 [points_b, desc_b] = sift(imb, 'Threshold', 0.01);
 [points_c, desc_c] = sift(imc, 'Threshold', 0.01);
