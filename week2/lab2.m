@@ -11,17 +11,17 @@ close all;
 %% Open images
 
 fprintf(1, 'Opening images\n');
-% imargb = imread('Data/llanes/llanes_a.jpg');
-% imbrgb = imread('Data/llanes/llanes_b.jpg');
-% imcrgb = imread('Data/llanes/llanes_c.jpg');
+imargb = imread('Data/llanes/llanes_a.jpg');
+imbrgb = imread('Data/llanes/llanes_b.jpg');
+imcrgb = imread('Data/llanes/llanes_c.jpg');
 
-imargb = imread('Data/castle_int/0016_s.png');
-imbrgb = imread('Data/castle_int/0015_s.png');
-imcrgb = imread('Data/castle_int/0014_s.png');
-
-imargb = imread('Data/aerial/site13/frame00000.png');
-imbrgb = imread('Data/aerial/site13/frame00002.png');
-imcrgb = imread('Data/aerial/site13/frame00003.png');
+% imargb = imread('Data/castle_int/0016_s.png');
+% imbrgb = imread('Data/castle_int/0015_s.png');
+% imcrgb = imread('Data/castle_int/0014_s.png');
+% 
+% imargb = imread('Data/aerial/site13/frame00000.png');
+% imbrgb = imread('Data/aerial/site13/frame00002.png');
+% imcrgb = imread('Data/aerial/site13/frame00003.png');
  
 ima = sum(double(imargb), 3) / 3 / 255;
 imb = sum(double(imbrgb), 3) / 3 / 255;
@@ -106,7 +106,7 @@ iwb = apply_H_v2(imbrgb, eye(3), corners);   % ToDo: complete the call to the fu
 iwa = apply_H_v2(imargb, Hab, corners);    % ToDo: complete the call to the function
 iwc = apply_H_v2(imcrgb, inv(Hbc), corners);    % ToDo: complete the call to the function
 
-figure(8);
+figure();
 imshow(max(iwc, max(iwb, iwa)));%image(max(iwc, max(iwb, iwa)));axis off;
 title('Mosaic A-B-C');
 
@@ -114,29 +114,29 @@ title('Mosaic A-B-C');
 % of three images with the code from points 1 and 2
 
 % % ToDo: compute the mosaic with castle_int images
-% imargb = imread('Data/castle_int/0016_s.png');
-% imbrgb = imread('Data/castle_int/0015_s.png');
-% imcrgb = imread('Data/castle_int/0014_s.png');
-% mosaic = compute_mosaic(imargb, imbrgb, imcrgb, 0.01, true, true);
-% figure;
-% imshow(mosaic);
-% title('Castle Mosaic A-B-C');
-% 
+im1 = imread('Data/castle_int/0016_s.png');
+im2 = imread('Data/castle_int/0015_s.png');
+im3 = imread('Data/castle_int/0014_s.png');
+mosaic = compute_mosaic(im1, im2, im3, 0.01, true, false);
+figure;
+imshow(mosaic);
+title('Castle Mosaic A-B-C');
+
 % % ToDo: compute the mosaic with aerial images set 13
-% imargb = imread('Data/aerial/site13/frame00000.png');
-% imbrgb = imread('Data/aerial/site13/frame00002.png');
-% imcrgb = imread('Data/aerial/site13/frame00003.png');
-% figure;
-% imshow(compute_mosaic(imargb, imbrgb, imcrgb, 0.01, true, false));
-% title('Site13 Mosaic A-B-C');
+im1 = imread('Data/aerial/site13/frame00000.png');
+im2 = imread('Data/aerial/site13/frame00002.png');
+im3 = imread('Data/aerial/site13/frame00003.png');
+figure;
+imshow(compute_mosaic(im1, im2, im3, 0.01, true, false));
+title('Site13 Mosaic A-B-C');
 % 
 % % ToDo: compute the mosaic with aerial images set 22
-% imargb = double(imread('Data/aerial/site22/frame_00001.tif'));
-% imbrgb = double(imread('Data/aerial/site22/frame_00018.tif'));
-% imcrgb = double(imread('Data/aerial/site22/frame_00030.tif'));
-% figure;
-% imshow(compute_mosaic(imargb, imbrgb, imcrgb, 0.05, false, false));
-% title('Site22 Mosaic A-B-C');
+im1 = double(imread('Data/aerial/site22/frame_00001.tif'));
+im2 = double(imread('Data/aerial/site22/frame_00018.tif'));
+im3 = double(imread('Data/aerial/site22/frame_00030.tif'));
+figure;
+imshow(compute_mosaic(im1, im2, im3, 0.05, false, false));
+title('Site22 Mosaic A-B-C');
 
 % ToDo: comment the results in every of the four cases: say why it works or
 %       does not work
@@ -152,9 +152,6 @@ x = points_a(1:2, matches_ab(1,inliers_ab));  %ToDo: set the non-homogeneous poi
 xp = points_b(1:2, matches_ab(2,inliers_ab)); %      point correspondences we will refine with the geometric method
 Xobs = [ x(:) ; xp(:) ];     % The column vector of observed values (x and x')
 P0 = [ Hab(:) ; x(:) ];      % The parameters or independent variables
-
-Xobs = [ x(:) ; xp(:) ];    % The column vector of observed values (x and x')
-P0 = [ Hab(:) ; x(:) ];     % The parameters or independent variables
 
 % ToDo: create this function that we need to pass to the lsqnonlin function
 % NOTE: gs_errfunction should return E(X) and not the sum-of-squares E=sum(E(X).^2)) that we want to minimize. 
@@ -257,7 +254,8 @@ title('Mosaic A-B-C');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. OPTIONAL: Calibration with a planar pattern
 
-clear all;
+addpath('sift');
+clear;
 
 %% Read template and images.
 T     = imread('Data/calib/template.jpg');
@@ -311,11 +309,26 @@ end
 %% Compute the Image of the Absolute Conic
 
 % w = ... % ToDo
+V = [];
+for i = 1:N
+    
+    V = [V; computeVij(H{i},1,2)';(computeVij(H{i},1,1)'-computeVij(H{i},2,2)') ];
+
+end
  
+[~, ~, Vt] = svd(V);
+omega = Vt(:, end);
+
+w = [omega(1), omega(2), omega(3);...
+    omega(2), omega(4), omega(5);...
+    omega(3), omega(5), omega(6)];
+
+
 %% Recover the camera calibration.
 
 % K = ... % ToDo
-    
+K = inv(chol(w));
+
 % ToDo: in the report make some comments related to the obtained internal
 %       camera parameters and also comment their relation to the image size
 
@@ -323,12 +336,17 @@ end
 R = cell(N,1);
 t = cell(N,1);
 P = cell(N,1);
-figure(15);hold;
+figure;hold;
 for i = 1:N
     % ToDo: compute r1, r2, and t{i}
 %     r1 = ...
 %     r2 = ...
 %     t{i} = ...
+
+    r1 = K\H{i}(:,1)./(norm(K\H{i}(:,1)));
+    r2 = K\H{i}(:,2)./(norm(K\H{i}(:,2)));
+    t{i} = K\H{i}(:,3)./(norm(K\H{i}(:,1)));
+    
     
     % Solve the scale ambiguity by forcing r1 and r2 to be unit vectors.
     s = sqrt(norm(r1) * norm(r2)) * sign(t{i}(3));
@@ -361,13 +379,17 @@ colormap(gray);
 axis equal;
 
 %% Plot a static camera with moving calibration pattern.
-figure(16); hold;
+figure; hold;
 plot_camera(K * eye(3,4), 800, 600, 200);
 % ToDo: complete the call to the following function with the proper
 %       coordinates of the image corners in the new reference system
-% for i = 1:N
-%     vgg_scatter_plot( [...   ...   ...   ...   ...], 'r');
-% end
+for i = 1:N
+    i1 =  R{i}*(p1 + t{i});
+    i2 =  R{i}*(p2 + t{i});
+    i3 =  R{i}*(p3 + t{i});
+    i4 =  R{i}*(p4 + t{i});
+    vgg_scatter_plot( [i1(1:3)   i2(1:3)   i3(1:3)   i4(1:3)   i1(1:3)], 'r');
+end
 
 %% Augmented reality: Plot some 3D points on every camera.
 [Th, Tw] = size(Tg);
