@@ -173,14 +173,16 @@ fprintf(1, 'Error has been reduced %f times\n', err_initial/err_final);
 figure(9);
 imshow(imargb);%image(imargb);
 hold on;
-plot(x(1,:), x(2,:),'+y');
+plot(x(1,:), x(2,:),'oy');
 plot(xhat(1,:), xhat(2,:),'+c');
+hold off;
 
 figure(10);
 imshow(imbrgb);%image(imbrgb);
 hold on;
-plot(xp(1,:), xp(2,:),'+y');
+plot(xp(1,:), xp(2,:),'oy');
 plot(xhatp(1,:), xhatp(2,:),'+c');
+hold off;
 
 %%  Homography bc
 
