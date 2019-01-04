@@ -1,4 +1,6 @@
 function I = compute_mosaic(imargb, imbrgb, imcrgb, threshold, norm, showfigures)
+% Computes the mosaic of 3 images of a sequence.    
+    v= 0;  % Set verbosity for SIFT
     if (norm)    
         ima = sum(double(imargb), 3) / 3 / 255;
         imb = sum(double(imbrgb), 3) / 3 / 255;
@@ -10,9 +12,9 @@ function I = compute_mosaic(imargb, imbrgb, imcrgb, threshold, norm, showfigures
     end
     
     %% Compute SIFT keypoints
-    [points_a, desc_a] = sift(ima, 'Threshold', threshold, 'Verbosity', 1);
-    [points_b, desc_b] = sift(imb, 'Threshold', threshold, 'Verbosity', 1);
-    [points_c, desc_c] = sift(imc, 'Threshold', threshold, 'Verbosity', 1);
+    [points_a, desc_a] = sift(ima, 'Threshold', threshold, 'Verbosity', v);
+    [points_b, desc_b] = sift(imb, 'Threshold', threshold, 'Verbosity', v);
+    [points_c, desc_c] = sift(imc, 'Threshold', threshold, 'Verbosity', v);
     
     if (showfigures)
         figure;
@@ -59,7 +61,7 @@ function I = compute_mosaic(imargb, imbrgb, imcrgb, threshold, norm, showfigures
     if (showfigures)
         figure;
         plotmatches(ima, imb, points_a(1:2,:), points_b(1:2,:), ...
-            matches_ab(:,inliers_ab), 'Stacking', 'v');
+            matches_ab(:,inliers_bc), 'Stacking', 'v');
 
         vgg_gui_H(imargb, imbrgb, Hab);
     end
