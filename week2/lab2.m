@@ -414,8 +414,6 @@ for i = 1:N
 end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-close all;  % To control the amount of total figures being displayed!
 
 %% 6. OPTIONAL: Detect the UPF logo in the two UPF images using the 
 %%              DLT algorithm (folder "logos").
