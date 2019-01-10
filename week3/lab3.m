@@ -2,7 +2,8 @@
 %% Lab 3: The geometry of two views 
 % (application: photo-sequencing)
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../week2');
+addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute the fundamental matrix
@@ -23,7 +24,7 @@ x2_test = P2 * X;
 F_es = fundamental_matrix(x1_test, x2_test);
 
 % Real fundamental matrix
-F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
+%F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
 % Evaluation: these two matrices should be very similar
 F_gt / norm(F_gt)
