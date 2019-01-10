@@ -24,7 +24,11 @@ x2_test = P2 * X;
 F_es = fundamental_matrix(x1_test, x2_test);
 
 % Real fundamental matrix
-%F_gt = ... % ToDo: write the expression of the real fundamental matrix for P1 and P2
+% skew symmetric matrix
+S = [0 -t(3) t(2); t(3) 0 -t(1); -t(2) t(1) 0];
+% Essential matrix
+E = S * R;
+F_gt = E'; % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
 % Evaluation: these two matrices should be very similar
 F_gt / norm(F_gt)
