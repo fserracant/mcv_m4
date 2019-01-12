@@ -8,6 +8,7 @@ addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you ha
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute the fundamental matrix
 
+clear all;
 % Two camera matrices for testing purposes
 P1 = eye(3,4);
 c = cosd(15); s = sind(15);
@@ -24,11 +25,16 @@ x2_test = P2 * X;
 F_es = fundamental_matrix(x1_test, x2_test);
 
 % Real fundamental matrix
+% translation vector must express translation from camera 2 to camera 1
+% so t2 need to be as the opposite as t
+t2 = t .* -1;
 % skew symmetric matrix
-S = [0 -t(3) t(2); t(3) 0 -t(1); -t(2) t(1) 0];
+S = [0 -t2(3) t2(2); t2(3) 0 -t2(1); -t2(2) t2(1) 0];
 % Essential matrix
 E = S * R;
-F_gt = E'; % ToDo: write the expression of the real fundamental matrix for P1 and P2
+% Intrinsic parameters of cameras (let's suppose it is eye(3))
+K = eye(3);
+F_gt = inv(K)' * E * inv(K); % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
 % Evaluation: these two matrices should be very similar
 F_gt / norm(F_gt)
