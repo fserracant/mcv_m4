@@ -87,8 +87,8 @@ vgg_gui_F(im1rgb, im2rgb, F');
 
 %% Plot some epipolar lines
 
-l2 = ... % epipolar lines in image 2 % ToDo
-l1 = ... % epipolar lines in image 1 % ToDo
+l2 = F * p1; % epipolar lines in image 2 % ToDo
+l1 = F' * p2; % epipolar lines in image 1 % ToDo
 
 % choose three random indices
 m1 = inliers(10);
