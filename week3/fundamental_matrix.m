@@ -3,7 +3,7 @@
 function F = fundamental_matrix(x1, x2)
 
     % normalisation of points
-    [x1_norm, T1] = normalise2dpts(x1)
+    [x1_norm, T1] = normalise2dpts(x1);
     [x2_norm, T2] = normalise2dpts(x2);
     
     % construction of W in 8-point algorithm
