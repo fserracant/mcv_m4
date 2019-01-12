@@ -36,10 +36,11 @@ E = S * R;
 K = eye(3);
 F_gt = inv(K)' * E * inv(K); % ToDo: write the expression of the real fundamental matrix for P1 and P2
 
-% Evaluation: these two matrices should be very similar
-F_gt / norm(F_gt)
-F_es / norm(F_es)
-
+% Evaluation: these two matrices should be very similar (up-to-scale)
+gt_f = F_gt / norm(F_gt);
+predicted_F = F_es / norm(F_es) * sign(F_es(1,1));
+error_on_F = sum(abs(gt_f(:) - predicted_F(:)));
+assert(error_on_F < 1e-9, 'Predicted F is not similar to ground truth')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Robustly fit fundamental matrix
