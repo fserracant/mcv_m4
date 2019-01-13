@@ -76,7 +76,7 @@ p1 = [points_1(1:2, matches(1,:)); ones(1, length(matches))];
 p2 = [points_2(1:2, matches(2,:)); ones(1, length(matches))];
 
 % ToDo: create this function (you can use as a basis 'ransac_homography_adaptive_loop.m')
-[F, inliers] = ransac_fundamental_matrix(p1, p2, 2); 
+[F, inliers] = ransac_fundamental_matrix(p1, p2, 2, 'sampson'); 
 
 % show inliers
 figure;
@@ -84,7 +84,6 @@ plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches(:,inliers), 'Sta
 title('Inliers');
 
 vgg_gui_F(im1rgb, im2rgb, F');
-
 
 %% Plot some epipolar lines
 

@@ -1,8 +1,13 @@
-% based on ransac_homograph_adaptive_loop()
-function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
+function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th, distance)
+  % based on ransac_homograph_adaptive_loop()
+  % distance can be set to 'geometric',  'sampson' or  'sampson2'
+  
     max_it = 1000;
     [~, Npoints] = size(x1);
-
+    if ~exist('distance', 'var')
+      distance = 'sampson';
+    end
+      
     % ransac
     it = 0;
     best_inliers = [];
@@ -14,8 +19,20 @@ function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
         points = randomsample(Npoints, 8);
         F = fundamental_matrix(x1(:,points), x2(:,points));
         F = F / norm(F);
-        inliers = compute_inliers_sampson_error(F, x1, x2, th);
-
+        
+        if strcmp(distance,'geometric')
+            disp('Using geometric distance')
+            inliers = compute_inliers_geometric_distance(F, x1, x2, th);
+        elseif strcmp(distance,'sampson')
+          disp('Using Sampson distance')
+          inliers = compute_inliers_sampson_error(F, x1, x2, th);
+        elseif strcmp(distance,'sampson2')
+          disp('Using Sampson2 distance')
+          inliers = compute_inliers_sampson_error2(F, x1, x2, th);
+        else
+          error('Distance not implemented')
+        end
+        
         % test if it is the best model so far
         if length(inliers) > length(best_inliers)
             best_inliers = inliers;
