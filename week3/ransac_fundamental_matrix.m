@@ -9,7 +9,7 @@ function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
     % probability that at least one random sample set is free of outliers
     p = 0.999; 
     while it < max_it
-        fprintf('Iteration %d out of %d (%d number of inliers)\n',  it, max_it, length(best_inliers));
+        fprintf('Iteration %d out of %.2f (%d number of inliers)\n',  it, max_it, length(best_inliers));
         
         points = randomsample(Npoints, 8);
         F = fundamental_matrix(x1(:,points), x2(:,points));
@@ -76,6 +76,29 @@ function idx_inliers = compute_inliers_sampson_error(F, x1, x2, th)
     
      % apply threshold
     idx_inliers = find(d < th);
+    
+    
+    function idx_inliers = compute_inliers_sampson_error2(F, x1, x2, th)
+      
+    % normalise homogeneous coordinates (third coordinate to 1)
+    x1 = normalise(x1);
+    x2 = normalise(x2);  
+    
+    % Compute terms for Sampson error
+    % Denominator
+    Fx1 = F * x1;
+    Ftx2 = F' * x2;
+
+    % Numerator
+    x2tFx1 = sum(x2 .* Fx1);  % x2 and Fx1 BOTH are 3xN mtxs
+
+    % Compute Samson error
+    % TODO: evaluate if here a normalization like 'normalise_line' helps
+    samps_err = x2tFx1.^2 ./(Fx1(1,:).^2 + Fx1(2,:).^2 + Ftx2(1,:).^2 + Ftx2(2,:).^2);
+
+    % Find inliers
+    idx_inliers = find(abs(samps_err) < th);
+    
     
 function xn = normalise(x)    
     xn = x ./ repmat(x(end,:), size(x,1), 1);
