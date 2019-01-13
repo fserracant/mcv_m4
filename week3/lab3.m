@@ -259,3 +259,7 @@ legend("trajectory on t0", "van on t0", ...
 %     Photo-sequencing paper with a selection of the detected dynamic
 %     features. You may reuse the code generated for the previous question.
 %
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% IMPLEMENTED ON lab3_optional.m
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
