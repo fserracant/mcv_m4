@@ -82,6 +82,19 @@ idx_obj_I3 = matches13(2, matches13(1,:)==idx_obj_I1); % ToDo: identify the corr
 idx_obj_I4 = matches14(2, matches14(1,:)==idx_obj_I1); % ToDo: identify the corresponding point of idx_obj_I1 in image 4
 idx_obj_I5 = matches15(2, matches15(1,:)==idx_obj_I1); % ToDo: identify the corresponding point of idx_obj_I1 in image 4
 
+%% Show descriptor's anchor points into images
+figure();
+subplot(2,3,1); imshow(im1); hold on;
+show_anchor_points(points_1(:,idx_obj_I1));
+subplot(2,3,2); imshow(im2); hold on;
+show_anchor_points(points_2(:,idx_obj_I2));
+subplot(2,3,3); imshow(im3); hold on;
+show_anchor_points(points_3(:,idx_obj_I3));
+subplot(2,3,4); imshow(im4); hold on;
+show_anchor_points(points_4(:,idx_obj_I4));
+subplot(2,3,5); imshow(im5); hold on;
+show_anchor_points(points_5(:,idx_obj_I5));
+
 %%
 % coordinates (in image 1) of the keypoint idx_obj_I1 (point in a obj). 
 % point1_1 is the projection of a 3D point in the 3D trajectory of the obj
