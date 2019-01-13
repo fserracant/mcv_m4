@@ -14,7 +14,7 @@ function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
         points = randomsample(Npoints, 8);
         F = fundamental_matrix(x1(:,points), x2(:,points));
         F = F / norm(F);
-        inliers = compute_inliers(F, x1, x2, th);
+        inliers = compute_inliers_sampson_error(F, x1, x2, th);
 
         % test if it is the best model so far
         if length(inliers) > length(best_inliers)
@@ -38,7 +38,7 @@ function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
     idx_inliers = best_inliers;
 
 
-function idx_inliers = compute_inliers(F, x1, x2, th)
+function idx_inliers = compute_inliers_geometric_distance(F, x1, x2, th)
       
     % normalise homogeneous coordinates (third coordinate to 1)
     x1 = normalise(x1);
@@ -55,7 +55,28 @@ function idx_inliers = compute_inliers(F, x1, x2, th)
     % apply threshold
     idx_inliers = find(d < th);
 
-
+function idx_inliers = compute_inliers_sampson_error(F, x1, x2, th)
+      
+    % normalise homogeneous coordinates (third coordinate to 1)
+    x1 = normalise(x1);
+    x2 = normalise(x2);  
+    % normalise epipolar lines (unit normal)
+    
+    l1 = (F' * x2);
+    l2 = (F * x1);
+    l1 = l1 ./ sqrt(repmat(l1(1,:).^2 + l1(2,:).^2 + l2(1,:).^2 + l2(2,:).^2, size(l1,1), 1));
+    l2 = l2 ./ sqrt(repmat(l1(1,:).^2 + l1(2,:).^2 + l2(1,:).^2 + l2(2,:).^2, size(l1,1), 1));
+    
+    % distance from points x1 to epipolar line of corresponding x2 in I1
+    d1 = abs(sum(l1.*x1));
+    % distance from points x2 to epipolar line of corresponding x1 in I2
+    d2 = abs(sum(l2.*x2));
+    % sum of distances
+    d = d1 + d2; 
+    
+     % apply threshold
+    idx_inliers = find(d < th);
+    
 function xn = normalise(x)    
     xn = x ./ repmat(x(end,:), size(x,1), 1);
 
