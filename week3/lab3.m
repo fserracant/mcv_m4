@@ -3,7 +3,7 @@
 % (application: photo-sequencing)
 
 addpath('../week2');
-addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../sift'); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Compute the fundamental matrix
