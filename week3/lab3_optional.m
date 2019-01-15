@@ -10,6 +10,8 @@
 %     features. You may reuse the code generated for the previous question.
 %
 clear all;
+addpath('../week2');
+addpath('../week2/sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 % Read images
 im1rgb = imread('Data/sequence3/view0_time0.jpg');
@@ -70,7 +72,7 @@ plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches12, 'Stacking', '
 
 % show inliers
 figure;
-plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches12(:,inliers), 'Stacking', 'v');
+plotmatches(im1, im2, points_1(1:2,:), points_2(1:2,:), matches12(:,inliers2), 'Stacking', 'v');
 title('Inliers');
 
 vgg_gui_F(im1rgb, im2rgb, F12');
@@ -86,14 +88,19 @@ idx_obj_I5 = matches15(2, matches15(1,:)==idx_obj_I1); % ToDo: identify the corr
 figure();
 subplot(2,3,1); imshow(im1); hold on;
 show_anchor_points(points_1(:,idx_obj_I1));
+title('frame0: view0 @ time0', 'FontSize', 24);
 subplot(2,3,2); imshow(im2); hold on;
 show_anchor_points(points_2(:,idx_obj_I2));
+title('frame1: view0 @ time1', 'FontSize', 24);
 subplot(2,3,3); imshow(im3); hold on;
 show_anchor_points(points_3(:,idx_obj_I3));
+title('frame2: view1 @ time2', 'FontSize', 24);
 subplot(2,3,4); imshow(im4); hold on;
 show_anchor_points(points_4(:,idx_obj_I4));
+title('frame3: view2 @ time3', 'FontSize', 24);
 subplot(2,3,5); imshow(im5); hold on;
 show_anchor_points(points_5(:,idx_obj_I5));
+title('frame4: view2 @ time4', 'FontSize', 24);
 
 %%
 % coordinates (in image 1) of the keypoint idx_obj_I1 (point in a obj). 
