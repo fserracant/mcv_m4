@@ -170,6 +170,9 @@ end
 assert(C2idx > 0, "No candidate found");
 P2 = Pc2{C2idx};
 
+% Highlight picked solution
+subplot(2,2,C2idx); box on; ax = gca; ax.LineWidth = 2;
+
 % Triangulate all matches.
 N = size(x1,2);
 X = zeros(4,N);
