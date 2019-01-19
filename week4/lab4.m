@@ -195,11 +195,17 @@ h1 = histogram(RE1);
 m1 = mean(RE1);
 ylim=get(gca,'ylim');
 line([m1 m1], ylim, 'Color', 'g');
+title({"Histogram of", "reprojection errors for Image 1"})
+xlabel("pixels")
+
 subplot(1,2,2);
 h2 = histogram(RE2);
 m2 = mean(RE2);
 ylim=get(gca,'ylim');
 line([m2 m2], ylim, 'Color', 'g');
+title({"Histogram of", "reprojection errors for Image 2"})
+xlabel("pixels")
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
