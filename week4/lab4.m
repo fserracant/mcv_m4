@@ -521,3 +521,49 @@ title("30x30 (BW)");
 % Remember to take into account occlusions as explained in the lab session.
 % Once done you can apply the code to the another pair of rectified images 
 % provided in the material and use the estimated disparities with previous methods.
+clear variables; clc; close all;
+
+%% Load images and disparity files
+Irgb1 = imread('Data/new_view/im0.png');
+Irgb2 = imread('Data/new_view/im1.png');
+I1 = sum(double(Irgb1), 3) / 3 / 255;
+I2 = sum(double(Irgb2), 3) / 3 / 255;
+[h,w] = size(I1);
+
+disp0_gt = parsePfm('Data/new_view/disp0.pfm');
+disp1_gt = parsePfm('Data/new_view/disp1.pfm');
+
+%% Show data
+figure(); 
+subplot(2,2,1); imshow(I1);
+subplot(2,2,2); imshow(I2);
+subplot(2,2,3); imshow(disp0_gt, []);
+subplot(2,2,4); imshow(disp1_gt, []);
+
+%% Epipolar rectification (external processing)
+% http://demo.ipol.im/demo/m_quasi_euclidean_epipolar_rectification/result?key=9F251CF6634AABDBED6EF711FAA6CC78
+% Input: (im0s.png, im1s.png)  
+% Output: (rec0.png, rec1.png, correspondences.txt) 
+% Log:
+%   best matching found:  183 points  log(nfa)=-420.636  (500 iterations)
+%   F= [ -2.20981e-12 -4.99157e-11 2.39569e-06; 7.85206e-10 1.8295e-10 -0.000789925; -2.84774e-06 0.00078936 0.000384152 ]
+%   Geometric error threshold: 0.845051
+%   LM iterations: 3 f=1823
+%   K_left: [ 1823 0 541.557; 0 1823 371.5; 0 0 1 ]
+%   K_right: [ 1823 0 540.864; 0 1823 371.5; 0 0 1 ]
+%   Initial rectification error: 0.198191 pix
+%   Final rectification error: 0.192938 pix
+%   Disparity: -208 -13
+
+rec0 = imread('Data/new_view/rec0.png');
+rec1 = imread('Data/new_view/rec1.png');
+
+% Correspondences as column vectors as [x1,y1,x2,y2]' coordinates
+corr = load('Data/new_view/correspondences.txt')';
+
+figure;
+imshow(rec0);
+hold on; scatter(corr(1,:), corr(2,:)); hold off;
+figure;
+imshow(rec1);
+hold on; scatter(corr(3,:), corr(4,:)); hold off;
