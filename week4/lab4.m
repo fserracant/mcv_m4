@@ -18,7 +18,7 @@ addpath('../week3');
 %           - P1 and P2 are the two camera matrices
 %           - imsize is a two-dimensional vector with the image size
 
-%% Test the triangulate function
+% Test the triangulate function
 % Use this code to validate that the function triangulate works properly
 
 P1 = eye(3,4);
@@ -37,9 +37,9 @@ for i = 1:N_test
     X_trian(:,i) = triangulate(x1_test(:,i), x2_test(:,i), P1, P2, [2 2]);
 end
 
-% error
-euclid(X_test) - euclid(X_trian)
-
+% Check error (euclidean distance between vectors)
+error = sqrt(sum((euclid(X_test) - euclid(X_trian)).^2));
+assert(sum(error) < 1e-12, 'BUG on triangulate function')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Reconstruction from two views
