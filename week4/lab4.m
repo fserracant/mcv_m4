@@ -135,7 +135,25 @@ plot_camera(Pc2{4},w,h);
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = Pc2{1};
+
+% we know camera 2 is on the right of camera 1 and both point the same
+% direction
+O1 = optical_center(P1);
+D1 = view_direction(P1, x1(:,1));
+C2idx = 0;
+for i = 1:4
+    O2 = optical_center(Pc2{i});
+    D2 = view_direction(Pc2{i}, x1(:,1));
+    
+    if O2(1) > 0 % camera 2 is on the right of camera 1
+        if isequal(sign(D1), sign(D2)) % both on the same direction
+            C2idx = i;
+        end
+    end 
+end
+
+assert(C2idx > 0, "No candidate found");
+P2 = Pc2{C2idx};
 
 % Triangulate all matches.
 N = size(x1,2);
@@ -156,8 +174,9 @@ plot_camera(P1,w,h);
 plot_camera(P2,w,h);
 for i = 1:length(Xe)
     scatter3(Xe(1,i), Xe(3,i), -Xe(2,i), 5^2, [r(i) g(i) b(i)]/255, 'filled');
-end;
+end
 axis equal;
+hold off;
 
 
 %% Compute reprojection error.
@@ -165,6 +184,23 @@ axis equal;
 % ToDo: compute the reprojection errors
 %       plot the histogram of reprojection errors, and
 %       plot the mean reprojection error
+
+x1_hat = euclid(P1 * X);
+x2_hat = euclid(P2 * X);
+RE1 = sqrt(sum((x1 - x1_hat) .^ 2));
+RE2 = sqrt(sum((x2 - x2_hat) .^ 2));
+figure;
+subplot(1,2,1);
+h1 = histogram(RE1);
+m1 = mean(RE1);
+ylim=get(gca,'ylim');
+line([m1 m1], ylim, 'Color', 'g');
+subplot(1,2,2);
+h2 = histogram(RE2);
+m2 = mean(RE2);
+ylim=get(gca,'ylim');
+line([m2 m2], ylim, 'Color', 'g');
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Depth map computation with local methods (SSD)
