@@ -125,19 +125,23 @@ Pc2{2} = K * [U * R1   -1 * U(:, end)];
 Pc2{3} = K * [U * R2        U(:, end)];
 Pc2{4} = K * [U * R2   -1 * U(:, end)];
 
-% plot the first camera and the four possible solutions for the second
+% plot the first camera (red) and the four possible solutions for the 
+%second camera (blue)
 figure;
 subplot(2,2,1);
-plot_camera(P1,w,h);
+plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{1},w,h);
+
 subplot(2,2,2);
-plot_camera(P1,w,h);
+plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{2},w,h);
+
 subplot(2,2,3);
-plot_camera(P1,w,h);
+plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{3},w,h);
+
 subplot(2,2,4);
-plot_camera(P1,w,h);
+plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{4},w,h);
 
 
