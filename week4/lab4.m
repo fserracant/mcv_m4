@@ -210,20 +210,22 @@ RE2 = sqrt(sum((x2 - x2_hat) .^ 2));
 
 figure;
 subplot(1,2,1);
-h1 = histogram(RE1);
+h1 = histogram(RE1,'BinEdges', 25:50:1025);
 m1 = mean(RE1);
 ylim=get(gca,'ylim');
-line([m1 m1], ylim, 'Color', 'g');
-title({"Histogram of", "reprojection errors for Image 1"})
-xlabel("pixels")
+ax = line([m1 m1], ylim, 'Color', 'r');
+title({"Histogram of", "reprojection errors for Image 1"});
+xlabel("pixels");
+legend(ax, 'mean');
 
 subplot(1,2,2);
-h2 = histogram(RE2);
+h2 = histogram(RE2,'BinEdges', 25:50:1025);
 m2 = mean(RE2);
 ylim=get(gca,'ylim');
-line([m2 m2], ylim, 'Color', 'g');
-title({"Histogram of", "reprojection errors for Image 2"})
-xlabel("pixels")
+ax = line([m2 m2], ylim, 'Color', 'r');
+title({"Histogram of", "reprojection errors for Image 2"});
+xlabel("pixels");
+legend(ax, 'mean');
 
 
 
