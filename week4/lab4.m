@@ -103,12 +103,8 @@ P1 = K * [eye(3) zeros(3,1)];
 % ToDo: write the four possible matrices for the second camera
 [U, D, V] = svd(E);
 W = [ 0 -1 0; 1 0 0; 0 0 1 ];
-
-Pc2 = {};
-Pc2{1} = K * [U * W  * V'      U(:, end)];
-Pc2{2} = K * [U * W  * V' -1 * U(:, end)];
-Pc2{3} = K * [U * W' * V'      U(:, end)];
-Pc2{4} = K * [U * W' * V' -1 * U(:, end)];
+R1 = W  * V';
+R2 = W' * V';
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -116,6 +112,18 @@ Pc2{4} = K * [U * W' * V' -1 * U(:, end)];
 % if det(R) < 0
 %     R = -R;
 % end
+if det(R1) < 0
+    R1 = -R1;
+end
+if det(R2) < 0
+    R2 = -R2;
+end
+
+Pc2 = {};
+Pc2{1} = K * [U * R1        U(:, end)];
+Pc2{2} = K * [U * R1   -1 * U(:, end)];
+Pc2{3} = K * [U * R2        U(:, end)];
+Pc2{4} = K * [U * R2   -1 * U(:, end)];
 
 % plot the first camera and the four possible solutions for the second
 figure;
@@ -189,6 +197,7 @@ x1_hat = euclid(P1 * X);
 x2_hat = euclid(P2 * X);
 RE1 = sqrt(sum((x1 - x1_hat) .^ 2));
 RE2 = sqrt(sum((x2 - x2_hat) .^ 2));
+
 figure;
 subplot(1,2,1);
 h1 = histogram(RE1);
