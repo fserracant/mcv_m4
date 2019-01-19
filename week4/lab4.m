@@ -152,7 +152,7 @@ title('Solution4')
 % ToDo: Choose a second camera candidate by triangulating a match.
 
 % we know camera 2 is on the right of camera 1 and both point the same
-% direction
+% direction (parallel configuration)
 O1 = optical_center(P1);
 D1 = view_direction(P1, x1(:,1));
 C2idx = 0;
