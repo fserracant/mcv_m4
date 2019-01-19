@@ -95,7 +95,7 @@ K = H * K;
 
 % ToDo: Compute the Essential matrix from the Fundamental matrix
 % from F = inv(K)' * E * inv(K) we derive expression for E
-E = (K' * F' * K)';
+E = K' * F * K;
 
 % ToDo: write the camera projection matrix for the first camera
 P1 = K * [eye(3) zeros(3,1)];
