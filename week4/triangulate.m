@@ -6,22 +6,21 @@ function X = triangulate(x1, x2, P1, P2, imsize)
     %           - P1 and P2 are the two camera matrices
     %           - imsize is a two-dimensional vector with the image size
 
-
+    % Normalization: Scaling and translation so that both pixel coordinates
+    % are in the interval [−1, 1].
     H = [2/imsize(1) 0 -1; 0 2/imsize(2) -1; 0 0 1];
-    
     x1 = H * [x1; 1];
     x2 = H * [x2; 1];
     P1 = H * P1;
     P2 = H * P2;
-    
+
     A = [ x1(1) * P1(3,:) - P1(1,:) ; ...
           x1(2) * P1(3,:) - P1(2,:) ; ...
           x2(1) * P2(3,:) - P2(1,:) ; ...
           x2(2) * P2(3,:) - P2(2,:) ];
-      
+
     [~, ~, V] = svd(A);
     X = V(:, end);
-    
     X = X ./ X(4);
 end
 
