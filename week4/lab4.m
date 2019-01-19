@@ -131,19 +131,22 @@ figure;
 subplot(2,2,1);
 plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{1},w,h);
+title('Solution1')
 
 subplot(2,2,2);
 plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{2},w,h);
+title('Solution2')
 
 subplot(2,2,3);
 plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{3},w,h);
+title('Solution3')
 
 subplot(2,2,4);
 plot_camera(P1,w,h,1,'r');
 plot_camera(Pc2{4},w,h);
-
+title('Solution4')
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
