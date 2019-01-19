@@ -1,8 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Lab 4: Reconstruction from two views (knowing internal camera parameters) 
 
-
+close all;
+clear all;
 addpath('../sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../week3');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Triangulation
@@ -78,7 +80,7 @@ plotmatches(I{1}, I{2}, points{1}, points{2}, inlier_matches, 'Stacking', 'v');
 x1 = points{1}(:, inlier_matches(1, :));
 x2 = points{2}(:, inlier_matches(2, :));
 
-%vgg_gui_F(Irgb{1}, Irgb{2}, F');
+vgg_gui_F(Irgb{1}, Irgb{2}, F');
 
 
 
@@ -91,20 +93,22 @@ scale = 0.3;
 H = [scale 0 0; 0 scale 0; 0 0 1];
 K = H * K;
 
-
 % ToDo: Compute the Essential matrix from the Fundamental matrix
-E = ...
-
+% from F = inv(K)' * E * inv(K) we derive expression for E
+E = (K' * F' * K)';
 
 % ToDo: write the camera projection matrix for the first camera
-P1 = ...
+P1 = K * [eye(3) zeros(3,1)];
 
 % ToDo: write the four possible matrices for the second camera
+[U, D, V] = svd(E);
+W = [ 0 -1 0; 1 0 0; 0 0 1 ];
+
 Pc2 = {};
-Pc2{1} = ...
-Pc2{2} = ...
-Pc2{3} = ...
-Pc2{4} = ...
+Pc2{1} = K * [U * W  * V'      U(:, end)];
+Pc2{2} = K * [U * W  * V' -1 * U(:, end)];
+Pc2{3} = K * [U * W' * V'      U(:, end)];
+Pc2{4} = K * [U * W' * V' -1 * U(:, end)];
 
 % HINT: You may get improper rotations; in that case you need to change
 %       their sign.
@@ -115,16 +119,23 @@ Pc2{4} = ...
 
 % plot the first camera and the four possible solutions for the second
 figure;
+subplot(2,2,1);
 plot_camera(P1,w,h);
 plot_camera(Pc2{1},w,h);
+subplot(2,2,2);
+plot_camera(P1,w,h);
 plot_camera(Pc2{2},w,h);
+subplot(2,2,3);
+plot_camera(P1,w,h);
 plot_camera(Pc2{3},w,h);
+subplot(2,2,4);
+plot_camera(P1,w,h);
 plot_camera(Pc2{4},w,h);
 
 
 %% Reconstruct structure
 % ToDo: Choose a second camera candidate by triangulating a match.
-P2 = ...
+P2 = Pc2{1};
 
 % Triangulate all matches.
 N = size(x1,2);
