@@ -521,49 +521,321 @@ title("30x30 (BW)");
 % Remember to take into account occlusions as explained in the lab session.
 % Once done you can apply the code to the another pair of rectified images 
 % provided in the material and use the estimated disparities with previous methods.
-clear variables; clc; close all;
+clc; clear variables; close all;
+
+addpath('../sift'); 
+addpath('../week3'); 
+addpath('../week2'); 
 
 %% Load images and disparity files
-Irgb1 = imread('Data/new_view/im0.png');
-Irgb2 = imread('Data/new_view/im1.png');
-I1 = sum(double(Irgb1), 3) / 3 / 255;
-I2 = sum(double(Irgb2), 3) / 3 / 255;
-[h,w] = size(I1);
+Irgb_0 = imread('Data/new_view/im0.png');
+Irgb_1 = imread('Data/new_view/im1.png');
 
-disp0_gt = parsePfm('Data/new_view/disp0.pfm');
-disp1_gt = parsePfm('Data/new_view/disp1.pfm');
+% Resize to speed up debbuging
+% Irgb_0 =imresize(Irgb_0, 0.1);
+% Irgb_1 =imresize(Irgb_1, 0.1);
+
+im_0 = im2double(rgb2gray(Irgb_0));
+im_1 = im2double(rgb2gray(Irgb_1));
+[h,w] = size(im_0);
+
+% Load disparity maps (ground truth)
+di_0 = parsePfm('Data/new_view/disp0.pfm');
+di_1 = parsePfm('Data/new_view/disp1.pfm');
+
+% Resize to speed up debbuging
+% di_0 = imresize(di_0, 0.1);
+% di_1 = imresize(di_1, 0.1);
+
+%% Look for disparity consistency 
+% apply some transf to disparity to match same object on both images ?
+disparity_th = 20;
+di_consistent_on = abs(di_0 - di_1) < disparity_th;
+di_inconsistent_on = abs(di_0 - di_1) >= disparity_th;
+% figure; imshow(di_consistent_on)
+% Keep only consistent values (set others to 0)
+im_0_true = di_0 .* di_consistent_on;
+figure; imshow(di_consistent_on)
 
 %% Show data
-figure(); 
-subplot(2,2,1); imshow(I1);
-subplot(2,2,2); imshow(I2);
-subplot(2,2,3); imshow(disp0_gt, []);
-subplot(2,2,4); imshow(disp1_gt, []);
+figure(1); 
+subplot(2,2,1); imshow(im_0);
+subplot(2,2,2); imshow(im_1);
+subplot(2,2,3); imshow(di_0, []);
+subplot(2,2,4); imshow(di_1, []);
 
-%% Epipolar rectification (external processing)
-% http://demo.ipol.im/demo/m_quasi_euclidean_epipolar_rectification/result?key=9F251CF6634AABDBED6EF711FAA6CC78
-% Input: (im0s.png, im1s.png)  
-% Output: (rec0.png, rec1.png, correspondences.txt) 
-% Log:
-%   best matching found:  183 points  log(nfa)=-420.636  (500 iterations)
-%   F= [ -2.20981e-12 -4.99157e-11 2.39569e-06; 7.85206e-10 1.8295e-10 -0.000789925; -2.84774e-06 0.00078936 0.000384152 ]
-%   Geometric error threshold: 0.845051
-%   LM iterations: 3 f=1823
-%   K_left: [ 1823 0 541.557; 0 1823 371.5; 0 0 1 ]
-%   K_right: [ 1823 0 540.864; 0 1823 371.5; 0 0 1 ]
-%   Initial rectification error: 0.198191 pix
-%   Final rectification error: 0.192938 pix
-%   Disparity: -208 -13
+%% Compute SIFT keypoints
+[points_0, desc_0] = sift(im_0, 'Threshold', 0.01);
+[points_1, desc_1] = sift(im_1, 'Threshold', 0.01);
 
-rec0 = imread('Data/new_view/rec0.png');
-rec1 = imread('Data/new_view/rec1.png');
+%% Match SIFT keypoints between Image 0 and Image 1
+matches = siftmatch(desc_0, desc_1);
+% Show matches
+% figure;
+% plotmatches(im0, im1, points_0(1:2,:), points_1(1:2,:), ...
+%             matches, 'Stacking', 'v');
 
-% Correspondences as column vectors as [x1,y1,x2,y2]' coordinates
-corr = load('Data/new_view/correspondences.txt')';
+% keypoints are the matches' coord (homogeneous)
+p0 = [points_0(1:2, matches(1,:)); ones(1, length(matches))];
+p1 = [points_1(1:2, matches(2,:)); ones(1, length(matches))];
 
+% Estimate fundamental matrix
+[F, inliers] = ransac_fundamental_matrix(p0, p1, 2); 
+
+% Show inliers
+% figure;
+% plotmatches(im0, im1, points_0(1:2,:), points_1(1:2,:), ...
+%             matches(:,inliers), 'Stacking', 'v');
+% title('Inliers');
+% vgg_gui_F(Irgb0, Irgb1, F');
+
+%% Define projection matrices
+Cx = -1; % x-axis translation of camera 1 wr camera 0
+PR_0 = [eye(3) zeros(3,1)];
+PR_1 = [eye(3); Cx 0 0]';
+
+% Compute projection matrix of Image S
+s = 0.5;
+PR_s = (1-s)*PR_0 + s*PR_1;
+
+% Compute matched points on Image S
+ps = (1-s)*p0 + s*p1;
+
+%% Show how keypoints are moved from both real images
+% It can be seen the objects are moved to the left on im0 and the right 
+% of im1. Indicating the transformed image is inbetween both given cameras.
+ps_e = euclid(ps);
+
+figure; 
+subplot(1,2,1);
+imshow(im_0,[]); hold on;
+scatter(p0(1,:), p0(2,:),'g.');
+scatter(ps_e(1,:), ps_e(2,:),'r.'); hold off;
+title('Translation from camera0')
+legend('from camera0', 'new view')
+subplot(1,2,2);
+imshow(im_1,[]); hold on;
+scatter(p1(1,:), p1(2,:),'g.');
+scatter(ps_e(1,:), ps_e(2,:),'r.'); hold off;
+title('Translation from camera1')
+legend('from camera1', 'new view')
+
+%% Find matching points pixel-by-pixel
+% Build points on im0
+[x,y] = find(ones(size(im_0,1), size(im_0,2)));
+p_0 = [x y]';
+% Init p1
+p_1 = p_0 .* 0;
+l = 0;
+for j=1:size(im_0,1)
+% search foreach scanline
+  for k=1:size(im_0,2)
+    l = l + 1;
+    % Get pixel from image 0
+    pixel_0 = im_0(j, k);
+    % Find the most similar one on image 1 (same row)
+    [I_SSD,I_NCC,Idata] = template_matching(pixel_0, im_1(j,:));
+    sim_xy = find(I_SSD == max(I_SSD(:)));
+    % Build points
+    p_1(:,l) = [k; sim_xy(1)];
+    % similiar pixel can be computed as: pixel_1 = im1(i, sim_xy(1));
+  end
+end
+
+%% Find matching points block-by-block
+% Build points on im0
+[x,y] = find(ones(size(im_0,1), size(im_0,2)));
+p_0 = [x y]';
+% Init p1
+p_1 = p_0 .* 0;
+l = 0;
+block_size = 20;
+
+% Pad image to avoid border control
+pad_size_y = block_size - mod(size(im_0, 1), block_size);
+pad_size_x = block_size - mod(size(im_0, 2), block_size);
+im_0_padded = padarray(im_0, [pad_size_x pad_size_y], 0, 'post');
+im_1_padded = padarray(im_1, [pad_size_x pad_size_y], 0, 'post');
+
+size(im_0), size(im_0_padded)
+% figure; imshow(im_0)
+% figure; imshow(im_0_padded)
+
+% foreach block_size-rows (20 rows)
 figure;
-imshow(rec0);
-hold on; scatter(corr(1,:), corr(2,:)); hold off;
-figure;
-imshow(rec1);
-hold on; scatter(corr(3,:), corr(4,:)); hold off;
+for j=1:block_size:(size(im_0,1)-block_size)
+    % Get some rows from image 0
+    image_0 = im_0_padded(j:(j+block_size-1),:);
+%     figure; imshow(image_0);
+    image_1 = im_1_padded(j:(j+block_size-1),:);
+%     figure; imshow(image_1);
+  
+  for k=1:block_size:(size(im_0,2)-block_size)
+    % get one block of 20 columns (20x20 patch)
+%     [k, (k+block_size-1)]
+    template_0 = im_0_padded(:,k:(k+block_size-1));
+%     size(template_0)
+%     size(image_1)
+    [I_SSD,I_NCC,Idata] = template_matching(template_0, image_1);
+%     fun = @(block_struct) template_matching(block_struct.data, block20rows_1);
+%     result = blockproc(im_0, [block_size block_size], fun);
+%     size(result)
+    % Find the most similar one on image 1 (same row)
+%     [I_SSD,I_NCC,Idata] = template_matching(block20rows_0, im_1(j,:));
+    I_NCC = sum(I_NCC, 1); % acumulate SSD of each column (sum diff of all rows)
+    norm_I_NCC =  sum(I_NCC,1)/block_size;
+    % Remove padding
+    norm_I_NCC = norm_I_NCC(1:stopper);
+    plot(norm_I_NCC); hold on;
+    stopper = size(im_1,2) - block_size;
+    sim_xy = find(norm_I_NCC == max(norm_I_NCC(:)));
+%     sim_xy
+    % Build points
+    p_1(:,l) = [k; sim_xy(1)];
+    % similiar pixel can be computed as: block_1 = ... ;
+%     break
+  end
+end
+axis tight;
+hold off;
+
+%% From the position difference on x-axis, compute disparity
+% use p0 and p1
+disparity = p_0(1,:) - p_1(1,:);
+disparity = disparity - min(disparity(:));
+disparity = disparity/max(disparity(:));
+disparity_map = im_0 * 0;
+for pos = 1:size(disparity,2)
+  x = p_0(1,pos);
+  y = p_0(2,pos);
+  disparity_map(x,y) = disparity(pos);
+end
+
+imshow(disparity_map,[])
+%% Depth is inv proportional to disparity
+
+%% Use disparity or depth to interpolate new view
+
+%% Replace disparity GT by estimating it using stereo_computation()
+
+%% other stuff
+% %% Epipolar rectification (external processing)
+% % http://demo.ipol.im/demo/m_quasi_euclidean_epipolar_rectification/result?key=9F251CF6634AABDBED6EF711FAA6CC78
+% % Input: (im0s.png, im1s.png)  
+% % Output: (rec0.png, rec1.png, correspondences.txt) 
+% % Log:
+% %   best matching found:  183 points  log(nfa)=-420.636  (500 iterations)
+% %   F= [ -2.20981e-12 -4.99157e-11 2.39569e-06; 7.85206e-10 1.8295e-10 -0.000789925; -2.84774e-06 0.00078936 0.000384152 ]
+% %   Geometric error threshold: 0.845051
+% %   LM iterations: 3 f=1823
+% %   K_left: [ 1823 0 541.557; 0 1823 371.5; 0 0 1 ]
+% %   K_right: [ 1823 0 540.864; 0 1823 371.5; 0 0 1 ]
+% %   Initial rectification error: 0.198191 pix
+% %   Final rectification error: 0.192938 pix
+% %   Disparity: -208 -13
+% rec0 = imread('Data/new_view/rec0.png');
+% rec1 = imread('Data/new_view/rec1.png');
+% 
+% % Correspondences as column vectors as [x1,y1,x2,y2]' coordinates
+% corresp = load('Data/new_view/correspondences.txt')';
+% 
+% figure(2);
+% imshow(rec0);
+% hold on; scatter(corresp(1,:), corresp(2,:)); hold off;
+% figure(3);
+% imshow(rec1);
+% hold on; scatter(corresp(3,:), corresp(4,:)); hold off;
+% 
+% %% Following paper
+% corresp_0 = homog(corresp(1:2,:));
+% corresp_1 = homog(corresp(3:4,:));
+% 
+% F = [ -2.20981e-12 -4.99157e-11 2.39569e-06; ...
+%       7.85206e-10 1.8295e-10 -0.000789925; ...
+%       -2.84774e-06 0.00078936 0.000384152 ];
+%     
+% K_left = [ 1823 0 541.557; 0 1823 371.5; 0 0 1 ];
+% K_right = [ 1823 0 540.864; 0 1823 371.5; 0 0 1 ];
+% 
+% % It should be something like this (only x-movement)
+% P1 = eye(3,4);
+% R = eye(3,3);
+% t = [10 0 1]';
+% P2 = [R t];
+% 
+% PI0 = [K_left K_left*C0];
+% s = 0.5
+% (1-s) * p0 + s * p0
+% 
+% %% Computing disparity
+% % x_minus_xp = corr(1,:)-corr(3,:);
+% 
+% %% Select a template in image 1
+% % w = 20;
+% % row = 250;
+% % column = 350;
+% % srow1 = rec0(row:(row+w), :, :);
+% % srow2 = rec1(row:(row+w), :, :);
+% template = im0(560:659, 1530:1669,:);
+% [h,w] = size(template);
+% image = im1(560:660, :,:);
+% % patch1 = rec0(row:(row+w), column:(column+w), :);
+% figure(4);
+% subplot(2,1,1);
+% imshow(template)
+% title('Template');
+% subplot(2,1,2);
+% imshow(image)
+% title('Image to look in');
+% 
+% %% Do template matching over image 2
+% [I_SSD,I_NCC, ~] = template_matching(template, image);
+% % [err, minErrorPosition] = patch_scan(patch1, patch2);
+% % mep = minErrorPosition;
+% % figure;
+% % plot(err);
+% % p2 = rec1(row:(row+w), (mep-w/2):(mep+w/2-1), :);
+% 
+% %% Plot similarity score of template over image
+% figure(5); 
+% subplot(2,1,1); plot(I_SSD(:)); title('SSD distance');
+% subplot(2,1,2); plot(I_NCC(:)); title('NCC distance');
+% [x,y] = find(I_NCC==max(I_NCC(:)))
+% die
+% %% Get region on image 2 that corresponds to template
+% patch2 = rec1((x-w/2):(x+w/2-1), (y-w/2):(y+w/2-1), :);
+% % p2 = rec1((x-w/2):(x+w/2-1), (y-w/2):(y+w/2-1), :);
+% figure(6);
+% subplot(4,1,4);
+% imshow(p1);
+% 
+% % subplot(1,3,1);
+% % imshow(patch1);
+% % subplot(1,3,2)
+% % imshow(p2);
+% % subplot(1,3,3)
+% 
+% 
+% % I1_hat = H1 * homog(I1);
+% % I2_hat = H2 * I2;
+% % X0(:,:,1) = I1;
+% % X0(:,:,2) = disp0_gt;
+% % p = (1-s) .* [x,y] + s .* [x-d(x,y), y];
+% 
+% %%
+% % Find maximum response
+%  I = im2double(imread('lena.png'));
+% % Template of Eye Lena
+%  T=I(124:140,124:140,:);
+%  T=I(250:280 ,250:290,:);
+% % Calculate SSD and NCC between Template and Image
+%  [I_SSD,I_NCC]=template_matching(T,I);
+% % Find maximum correspondence in I_SDD image
+%  [x,y]=find(I_SSD==max(I_SSD(:)));
+%  [x,y]=find(I_NCC==max(I_NCC(:)));
+% % Show result
+%  figure, 
+%  subplot(2,2,1), imshow(I); hold on; plot(y,x,'r*'); title('Result')
+%  subplot(2,2,2), imshow(T); title('The eye template');
+%  subplot(2,2,3), imshow(I_SSD); title('SSD Matching');
+%  subplot(2,2,4), imshow(I_NCC); title('Normalized-CC');
