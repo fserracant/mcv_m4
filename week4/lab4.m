@@ -210,7 +210,7 @@ RE2 = sqrt(sum((x2 - x2_hat) .^ 2));
 
 figure;
 subplot(1,2,1);
-h1 = histogram(RE1,'BinEdges', 25:50:1025);
+h1 = histogram(RE1);
 m1 = mean(RE1);
 ylim=get(gca,'ylim');
 ax = line([m1 m1], ylim, 'Color', 'r');
@@ -219,7 +219,7 @@ xlabel("pixels");
 legend(ax, 'mean');
 
 subplot(1,2,2);
-h2 = histogram(RE2,'BinEdges', 25:50:1025);
+h2 = histogram(RE2);
 m2 = mean(RE2);
 ylim=get(gca,'ylim');
 ax = line([m2 m2], ylim, 'Color', 'r');
@@ -257,6 +257,34 @@ legend(ax, 'mean');
 % and 16 as the the maximum one.
 
 
+left  = imread('Data/scene1.row3.col3.ppm');
+right = imread('Data/scene1.row3.col4.ppm');
+max_d = 16;
+min_d = 0;
+
+figure;
+subplot(2,2,1);
+D = stereo_computation(left, right, min_d, max_d, 3, 'ssd');
+imshow(D);
+title("3x3 (SSD)");
+
+subplot(2,2,2);
+D = stereo_computation(left, right, min_d, max_d, 9, 'ssd');
+imshow(D);
+title("9x9 (SSD)");
+
+subplot(2,2,3);
+D = stereo_computation(left, right, min_d, max_d, 20, 'ssd');
+imshow(D);
+title("20x20 (SSD)");
+
+subplot(2,2,4);
+D = stereo_computation(left, right, min_d, max_d, 30, 'ssd');
+imshow(D);
+title("30x30 (SSD)");
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Depth map computation with local methods (NCC)
 
@@ -265,6 +293,59 @@ legend(ax, 'mean');
 %
 % Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
 % 30x30) and the matching cost. Comment the results.
+
+figure();
+subplot(2,2,1);
+D = stereo_computation(left, right, min_d, max_d, 3, 'ncc');
+imshow(D);
+title("3x3 (NCC)");
+
+subplot(2,2,2);
+D = stereo_computation(left, right, min_d, max_d, 9, 'ncc');
+imshow(D);
+title("9x9 (NCC)");
+
+subplot(2,2,3);
+D = stereo_computation(left, right, min_d, max_d, 20, 'ncc');
+imshow(D);
+title("20x20 (NCC)");
+
+subplot(2,2,4);
+D = stereo_computation(left, right, min_d, max_d, 30, 'ncc');
+imshow(D);
+title("30x30 (NCC)");
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% OPTIONAL:  Depth map computation with local methods (SAD)
+
+% Complete the previous function by adding the implementation of the SAD
+% cost.
+%
+% Evaluate the results changing the window size (e.g. 3x3, 9x9, 20x20,
+% 30x30) and the matching cost. Comment the results.
+
+figure();
+subplot(2,2,1);
+D = stereo_computation(left, right, min_d, max_d, 3, 'sad');
+imshow(D);
+title("3x3 (SAD)");
+
+subplot(2,2,2);
+D = stereo_computation(left, right, min_d, max_d, 9, 'sad');
+imshow(D);
+title("9x9 (SAD)");
+
+subplot(2,2,3);
+D = stereo_computation(left, right, min_d, max_d, 20, 'sad');
+imshow(D);
+title("20x20 (SAD)");
+
+subplot(2,2,4);
+D = stereo_computation(left, right, min_d, max_d, 30, 'sad');
+imshow(D);
+title("30x30 (SAD)");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Depth map computation with local methods
@@ -277,6 +358,75 @@ legend(ax, 'mean');
 % Notice that in this new data the minimum and maximum disparities may
 % change.
 
+
+left  = imread('Data/0001_rectified_s.png');
+right = imread('Data/0002_rectified_s.png');
+
+max_d = 30;
+min_d = 0;
+figure;
+subplot(2,2,1);
+D = stereo_computation(left, right, min_d, max_d, 3, 'ssd');
+imshow(D);
+title("3x3 (SSD)");
+
+subplot(2,2,2);
+D = stereo_computation(left, right, min_d, max_d, 9, 'ssd');
+imshow(D);
+title("9x9 (SSD)");
+
+subplot(2,2,3);
+D = stereo_computation(left, right, min_d, max_d, 20, 'ssd');
+imshow(D);
+title("20x20 (SSD)");
+
+subplot(2,2,4);
+D = stereo_computation(left, right, min_d, max_d, 30, 'ssd');
+imshow(D);
+title("30x30 (SSD)");
+
+figure();
+subplot(2,2,1);
+D = stereo_computation(left, right, min_d, max_d, 3, 'ncc');
+imshow(D);
+title("3x3 (NCC)");
+
+subplot(2,2,2);
+D = stereo_computation(left, right, min_d, max_d, 9, 'ncc');
+imshow(D);
+title("9x9 (NCC)");
+
+subplot(2,2,3);
+D = stereo_computation(left, right, min_d, max_d, 20, 'ncc');
+imshow(D);
+title("20x20 (NCC)");
+
+subplot(2,2,4);
+D = stereo_computation(left, right, min_d, max_d, 30, 'ncc');
+imshow(D);
+title("30x30 (NCC)");
+
+figure();
+subplot(2,2,1);
+D = stereo_computation(left, right, min_d, max_d, 3, 'sad');
+imshow(D);
+title("3x3 (SAD)");
+
+subplot(2,2,2);
+D = stereo_computation(left, right, min_d, max_d, 9, 'sad');
+imshow(D);
+title("9x9 (SAD)");
+
+subplot(2,2,3);
+D = stereo_computation(left, right, min_d, max_d, 20, 'sad');
+imshow(D);
+title("20x20 (SAD)");
+
+subplot(2,2,4);
+D = stereo_computation(left, right, min_d, max_d, 30, 'sad');
+imshow(D);
+title("30x30 (SAD)");
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. Bilateral weights
 
@@ -287,6 +437,33 @@ legend(ax, 'mean');
 % Comment the results and compare them to the previous results (no weights).
 %
 % Note: Use grayscale images (the paper uses color images)
+
+
+left  = imread('Data/scene1.row3.col3.ppm');
+right = imread('Data/scene1.row3.col4.ppm');
+max_d = 16;
+min_d = 0;
+
+figure();
+subplot(2,2,1);
+D = stereo_computation_BW(left, right, min_d, max_d, 3, 'BW');
+imshow(D);
+title("3x3 (BW)");
+
+subplot(2,2,2);
+D = stereo_computation_BW(left, right, min_d, max_d, 9, 'BW');
+imshow(D);
+title("9x9 (BW)");
+
+subplot(2,2,3);
+D = stereo_computation_BW(left, right, min_d, max_d, 20, 'BW');
+imshow(D);
+title("20x20 (BW)");
+
+subplot(2,2,4);
+D = stereo_computation_BW(left, right, min_d, max_d, 30, 'BW');
+imshow(D);
+title("30x30 (BW)");
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Stereo computation with Belief Propagation
