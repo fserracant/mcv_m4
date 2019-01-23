@@ -465,6 +465,34 @@ D = stereo_computation_BW(left, right, min_d, max_d, 30, 'BW');
 imshow(D);
 title("30x30 (BW)");
 
+left  = imread('Data/0001_rectified_s.png');
+right = imread('Data/0002_rectified_s.png');
+
+max_d = 30;
+min_d = 0;
+
+figure();
+subplot(2,2,1);
+D = stereo_computation_BW(left, right, min_d, max_d, 3, 'BW');
+imshow(D);
+title("3x3 (BW)");
+
+subplot(2,2,2);
+D = stereo_computation_BW(left, right, min_d, max_d, 9, 'BW');
+imshow(D);
+title("9x9 (BW)");
+
+subplot(2,2,3);
+D = stereo_computation_BW(left, right, min_d, max_d, 20, 'BW');
+imshow(D);
+title("20x20 (BW)");
+
+subplot(2,2,4);
+D = stereo_computation_BW(left, right, min_d, max_d, 30, 'BW');
+imshow(D);
+title("30x30 (BW)");
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% OPTIONAL:  Stereo computation with Belief Propagation
 
