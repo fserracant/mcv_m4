@@ -169,6 +169,25 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
+% Compute keypoints and matches for all pairs of views
+nViews = 2;
+points = cell(nViews,1);
+descr = cell(nViews,1);
+% Descriptors
+for i = 1:nViews
+  [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
+  points{i} = points{i}(1:2,:);
+end
+
+% Matches
+matches = cell(nViews-1,1);
+for i = 1:nViews-1
+  matches{i} = siftmatch(descr{i}, descr{i+1});
+end
+
+% Run the Factorization method to retrieve Pproj and Xproj
+[Pproj, Xproj] = factorization_method(matches);
+
 %% Check projected points (estimated and data points)
 
 for i=1:2
