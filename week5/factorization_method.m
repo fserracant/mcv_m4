@@ -56,6 +56,7 @@ end
 %% Step 6: compute the SVD of balanced W
 
 %% Step 7: recover projective motion + shape from SVD decomposition
+% Identify motion and shape from SVD
 
 %% Step 8: adapt projective motion (Pi) accounting for Ti => denormalise
 % Pi_hat' = inv(Ti) * Pi_hat
