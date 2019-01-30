@@ -76,7 +76,7 @@ end
 
 
 % TODO: embed following steps in a while() loop until convergence
-coverged = false;
+converged = false;
 d = 1000;
 while ~converged
   %% Step 4: build the rescaled measurement matrix W
