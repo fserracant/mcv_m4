@@ -186,8 +186,14 @@ x2(3,:) = x2(3,:)./x2(3,:);
 %   matches{i} = siftmatch(descr{i}, descr{i+1});
 % end
 
+%% 
+points = [x1; x2];
+matches = cell(2,1);
+matches{1} = 1:size(x1,2);
+matches{2} = 1:size(x1,2);
+
 % Run the Factorization method to retrieve Pproj and Xproj
-[Pproj, Xproj] = factorization_method(matches, points, 'SturmAndTriggs');
+[Pproj, Xproj] = factorization_method(points, matches, 'ones');
 
 %% Check projected points (estimated and data points)
 
