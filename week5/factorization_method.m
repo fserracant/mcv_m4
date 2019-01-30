@@ -30,7 +30,7 @@ ransac_thr = 2.0;  % test different values if needed
 % Is this really needed if the Normalized 8-point algorithm already does
 % this?
 xh_norm = zeros(size(xh));
-T = struct(Ncam,1);
+T = cell(Ncam,1);
 for i = 1:3:Ncam
   [xh_norm(i:i+2,:), T{i}] = normalise2dpts(xh(i:i+2,:));
 end
