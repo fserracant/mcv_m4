@@ -1,14 +1,15 @@
-function [Pproj, Xproj] = factorization_method(xh, points_views, lambda_init)
+function [Pproj, Xproj] = factorization_method(xh, lambda_init)
 % Implements the factorization method from [Sturm96] to do projective
 % reconstruction (recover projective structure + motion).
 %
 % Inputs
-%   - xh:             a matrix of 3*Ncam x Npoints corresponding to
+%   - xh:             a matrix of 3*Ncam x Npoints matches corresponding to
 %                     each view.
 %                     (1-2, 2-3, 3-4,..., m-1-m).
 %   - points_views:   location of the keypoints found for each view.
 %                     It has size 2 x Npoints (i.e.: non homogeneous).
-%   -
+%   - lambda_init:    how to compute the depth weights 'lambda'. 'ones'
+%                     sets all lambdas to 1, 'SturmAndTriggs' uses the method in [Sturm96].
 %
 % Outputs
 %   - Pproj:          3*Ncam x 4 matrix containing the camera matrices.
@@ -39,26 +40,20 @@ end
 if strcmpi(lambda_init, 'SturmAndTriggs')
   %% Step 2: compute fundamental matrix/ces with the Robust 8-point algorithm*
   % * maybe to speed up this we'll need to use "only" the Normalised version.
-%   Fr = struct(Ncam-1,1);
-%   idx_inliers = struct(Ncam-1,1);
+  %   Fr = cell(Ncam-1,1);
+  %   idx_inliers = cell(Ncam-1,1);
   %
   %   iref = 1;  % we apply the same constraint as [Sturm96]: the images are taken
-  % pairwise in sequence, F12, F23, F34,..., Fm-1m
-  %   for i = 1:Ncam-1
-  %     x1 = points_views{i}(:, xh_norm(3*i-2, :));
-  %     x2 = points_views{i+1}(:, xh_norm(3*i-1, :));
-  %     % TODO: compute epipoles to determine lambda's.
-  %     [Fr{i}, idx_inliers{i}, ] = ransac_fundamental_matrix(homog(x1), homog(x2), ransac_thr);
-  %     % F = fundamental_matrix(homog(x1), homog(x2));  % Normalized 8-point algorithm
-  %   end
+  %   pairwise in sequence, F12, F23, F34,..., Fm-1m
+  
   %TODO: first naive implementation, naïve loops for all views and all points
   lambda = ones(Ncam, Npoints);  % Lambda for the first view is 1
   iref = 1;
   for i = 2:Ncam
-    xref = points_views{iref}(:, xh_norm(3*iref-2, :));
-    xi = points_views{i}(:, xh_norm(3*i-1, :));
-    [Fri, ~, eri, eir] = ransac_fundamental_matrix(homog(x1), homog(x2), ransac_thr);
-%% Step 3: determine scale factors (lambda's) via eq(3) of [Sturm96]
+    xref = xh_norm(3*iref-2:3*iref, :);
+    xi = xh_norm(3*i-2:3*i, :);
+    [Fri, ~, eri, eir] = ransac_fundamental_matrix(xi, xref, ransac_thr);
+  %% Step 3: determine scale factors (lambda's) via eq(3) of [Sturm96]
     for p = 1:Npoints
       xrp = xref(:,p);
       xip = xi(:,p);
@@ -98,16 +93,25 @@ while ~converged
   % W as a whole). We may want to try this in the future and compare both results.
   
   p = 2;  % Norm used, here L2.
-  % 1. Normalise rows
-  rows_norm = vecnorm(W, p, 2);
-  W_b = W ./ repmat(rows_norm, [1, size(W,2)]);
-  % 2. Normalise columns
-  cols_norm = vecnorm(W_b, p, 1);
-  W_b = W_b ./ repmat(cols_norm, [size(W_b,1), 1]);
+
+  % Normalise columns and rows twice
+  for it = 1:2
+    norm_cols = vecnorm(lambda, p, 1);
+    lambda = lambda ./ repmat(norm_cols, [size(lambda,1),1]);
+
+    norm_rows = vecnorm(lambda, p, 2);
+    lambda = lambda ./ repmat(norm_rows, [1, size(lambda,2)]);
+  end
+
+  W_b = zeros(3*Ncam, Npoints);
+  for i = 1:Ncam
+    for p = 1:Npoints
+      W_b(3*i-2:3*i,p) = lambda(i,p) * xh_norm(3*i-2:3*i,p);
+    end
+  end
   
   %% Step 6: compute the SVD of balanced W
-  W_b
-  [U,D,V] = svd(W_b)
+  [U,D,V] = svd(W_b);
   % Force W_b to have rank 4 by setting eigenvalues i>4 to 0
   Sigma = diag(diag(D(1:4,1:4)));
   Sigma_p = sqrt(Sigma);
@@ -115,14 +119,16 @@ while ~converged
   % Decomp of W.
   % W = U' * Sigma_p * Sigma_pp * V' = U_hat * V_hat
   % where U' contains the first 4 columns of U, V' the first 4 rows of V
-  W_b = U(:,1:4) * Sigma_p * Sigma_pp * V(1:4,:);
+  W_b = U(:,1:4) * Sigma_p * Sigma_pp * V(:,1:4)';
   
   %% Step 7: recover projective motion + shape from SVD decomposition
   % Identify motion and shape from SVD
   % From above, one can relate U_hat to a set of m projection matrices and
   % V_hat to a set of Npoints.
   P_hat = U(:,1:4) * Sigma_p;
-  X_hat = Sigma_pp * V(1:4,:);
+  X_hat = Sigma_pp * V(:,1:4)';
+  Pproj = P_hat;
+  Xproj = X_hat;
   
   % Compute reprojection error
   d_old = d;
@@ -138,12 +144,12 @@ end
 %% Step 8: adapt projective motion (Pi) accounting for Ti => denormalise
 % The points X_proj are not changed.
 % Pi_hat' = inv(Ti) * Pi_hat
-Pproj = zeros(3 * Ncam, 4);
-for i = 1:Ncam
-  aux = T{i} \ P_hat;
-  Pproj(3*i-2:3*i, :) = aux;
-end
-
-Xproj = X_hat;
+% Pproj = zeros(3 * Ncam, 4);
+% for i = 1:Ncam
+%   aux = T{i} \ P_hat;
+%   Pproj(3*i-2:3*i, :) = aux;
+% end
+% 
+% Xproj = X_hat;
 
 end
