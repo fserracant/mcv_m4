@@ -190,7 +190,7 @@ x2(3,:) = x2(3,:)./x2(3,:);
 points = [x1; x2];
 
 % Run the Factorization method to retrieve Pproj and Xproj
-[Pproj, Xproj] = factorization_method(points, 'ones');
+[Pproj, Xproj] = factorization_method(points, 'SturmAndTriggs');
 
 %% Check projected points (estimated and data points)
 
