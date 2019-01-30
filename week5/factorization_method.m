@@ -11,19 +11,27 @@ function [Pproj, Xproj] = factorization_method(x, P, lambda_init)
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
+[x1,T1]=normalise2dpts(x1);
+[x2,T2]=normalise2dpts(x2);
+
+x = [x1;x2];
 if strcmpi(lambda_init, 'ones')
-    lambda = ones(size(x));
+    lambda = ones(2,length(x));
 elseif strcmpi(lambda_init, 'StrumAndTriggs')
     
 end
 
-x = normalize_data(x);
+%x = normalize_data(x);
 
 d = 1000;
 converged = false;
 while not(converged)
-    M = x .* lambda;
-
+    
+    lambda = rescaleLambda(lambda);
+    M = zeros(6, length(x2));
+    M(1:3,:) = x(1:3,:).*lambda(1,:);
+    M(4:6,:) = x(4:6,:).*lambda(2,:);
+    
     [U, D, V] = svd(M);
 
     D_4 = D;
@@ -36,26 +44,58 @@ while not(converged)
     d = sum(sqrt( sum((x - (P_M * X_M)) .^ 2)))
     converged = (abs(d - d_old) / d) < 0.1;
     if not(converged)
-        lambda = P_M * X_M;
+        xp = P_M*X_M;
+        lambda(1,:) = xp(3,:);
+        lambda(2,:) = xp(6,:);
     end
 end
 
 Pproj = P_M;
 Xproj = X_M;
+
+Pproj(1:3,:) = T1 \ Pproj(1:3,:);
+Pproj(4:6,:) = T2 \ Pproj(4:6,:);
+
 end
 
-function x_norm = normalize_data(x)
+% function x_norm = normalize_data(x)
+% 
+% x_norm = [];
+% for i = 1:3:size(x,1)
+%     x_i = x(i:i+2,:);
+%     centroid = mean(x_i,2);
+%     distances = sqrt( sum((x_i - centroid) .^ 2 ));
+%     s_i = sqrt(2) / mean(distances);
+%     H_i = [s_i 0 -s_i*centroid(1); 0 s_i -s_i*centroid(2); 0 0 1];
+%     x_i_norm = H_i * x_i;
+%     
+%     x_norm = [x_norm; x_i_norm];
+% end
+% 
+% end
 
-x_norm = [];
-for i = 1:3:size(x,1)
-    x_i = x(i:i+2,:);
-    centroid = mean(x_i,2);
-    distances = sqrt( sum((x_i - centroid) .^ 2 ));
-    s_i = sqrt(2) / mean(distances);
-    H_i = [s_i 0 -s_i*centroid(1); 0 s_i -s_i*centroid(2); 0 0 1];
-    x_i_norm = H_i * x_i;
+
+function newLambda = rescaleLambda(lambda)
+
+
+converged = false;
+for i=1:5
+    oldLambda = lambda;
+    lambda = lambda./vecnorm(lambda,1,1);
+    converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
+    if converged
+            break;
+    end
     
-    x_norm = [x_norm; x_i_norm];
+    oldLambda = lambda;
+    lambda = lambda./vecnorm(lambda,1,2);
+    converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
+    if converged
+            break;
+    end
+    
 end
+
+newLambda = lambda;
 
 end
