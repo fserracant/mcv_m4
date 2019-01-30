@@ -31,8 +31,8 @@ ransac_thr = 2.0;  % test different values if needed
 % this?
 xh_norm = zeros(size(xh));
 T = cell(Ncam,1);
-for i = 1:3:Ncam
-  [xh_norm(i:i+2,:), T{i}] = normalise2dpts(xh(i:i+2,:));
+for i = 1:Ncam
+  [xh_norm(3*i-2:3*i,:), T{i}] = normalise2dpts(xh(3*i-2:3*i,:));
 end
 
 % Note: step 2 only needed if in step 3 we use lambdas!= 1
