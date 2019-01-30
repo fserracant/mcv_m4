@@ -185,8 +185,17 @@ for i = 1:nViews-1
   matches{i} = siftmatch(descr{i}, descr{i+1});
 end
 
+% TODO: get only Npoints matches that "are visible" in all m views.
+% How to do that?
+%   1. RANSAC-like framework, select Npoints at a time (Npoints is min. num of points
+%   for any view). Iterate.
+%   2. Somehow, by triangulation, find the closest points (to each other).
+
+% At the end, we want to have size(matches) = 3*Ncam x Npoints
+% points is 2 x Npoints
+
 % Run the Factorization method to retrieve Pproj and Xproj
-[Pproj, Xproj] = factorization_method(matches);
+[Pproj, Xproj] = factorization_method(matches, points, 'SturmAndTriggs');
 
 %% Check projected points (estimated and data points)
 
