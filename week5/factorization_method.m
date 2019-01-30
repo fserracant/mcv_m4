@@ -106,12 +106,12 @@ while ~converged
   W_b = W_b ./ repmat(cols_norm, [size(W_b,1), 1]);
   
   %% Step 6: compute the SVD of balanced W
-  [U,D,V] = svd(W_b);
+  W_b
+  [U,D,V] = svd(W_b)
   % Force W_b to have rank 4 by setting eigenvalues i>4 to 0
-  D4 = diag(D);
-  Sigma = D4(1:4);  % not used as Sigma = Sigma_p * Sigma_pp
-  Sigma_p = sqrt(D4(1:4));
-  Sigma_pp = Sigma_p;
+  Sigma = diag(diag(D(1:4,1:4)));
+  Sigma_p = sqrt(Sigma);
+  Sigma_pp = sqrt(Sigma);
   % Decomp of W.
   % W = U' * Sigma_p * Sigma_pp * V' = U_hat * V_hat
   % where U' contains the first 4 columns of U, V' the first 4 rows of V
