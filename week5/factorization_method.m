@@ -23,7 +23,7 @@ function [Pproj, Xproj] = factorization_method(xh, points_views, lambda_init)
 % Andrew Zisserman.
 
 %% Step 0: some initializations
-Ncam = size(xh, 1)/3;  % a.k.a. 'Ncam'
+Ncam = size(xh, 1) / 3;  % a.k.a. 'Ncam'
 Npoints = size(xh, 2);
 ransac_thr = 2.0;  % test different values if needed
 %% Step 1: normalise image coordinates (centroid at origin, dist. sqrt(2))
