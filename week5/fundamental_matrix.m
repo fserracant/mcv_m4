@@ -4,7 +4,7 @@
 % a stereo pair of images.  The normalised 8 point algorithm given by
 % Hartley and Zisserman p265 is used.
 %
-% Usage:   F = fundmatrix(x1, x2)
+% Usage:   [F, e12,e21] = fundmatrix(x1, x2)
 %         
 % Arguments:
 %          x1, x2 - Two sets of corresponding 3xN set of homogeneous
@@ -16,7 +16,7 @@
 
 % Based on Peter Kovesi's code
 
-function F = fundamental_matrix(x1, x2)
+function [F, e12, e21] = fundamental_matrix(x1, x2)
 
     npts = size(x1,2); 
     
@@ -44,4 +44,8 @@ function F = fundamental_matrix(x1, x2)
     
     % Denormalise
     F = T2'*F*T1;
+    
+    % Compute epipoles e12, e21
+    e12 = V(:,3);
+    e21 = U(:,3);
     

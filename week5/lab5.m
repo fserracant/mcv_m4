@@ -2,7 +2,7 @@
 %% Lab 5: Reconstruction from uncalibrated viewas
 
 
-addpath('sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -169,30 +169,22 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
+%% ONLY FOR REAL IMAGES!
 % Compute keypoints and matches for all pairs of views
-nViews = 2;
-points = cell(nViews,1);
-descr = cell(nViews,1);
-% Descriptors
-for i = 1:nViews
-  [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
-  points{i} = points{i}(1:2,:);
-end
-
-% Matches
-matches = cell(nViews-1,1);
-for i = 1:nViews-1
-  matches{i} = siftmatch(descr{i}, descr{i+1});
-end
-
-% TODO: get only Npoints matches that "are visible" in all m views.
-% How to do that?
-%   1. RANSAC-like framework, select Npoints at a time (Npoints is min. num of points
-%   for any view). Iterate.
-%   2. Somehow, by triangulation, find the closest points (to each other).
-
-% At the end, we want to have size(matches) = 3*Ncam x Npoints
-% points is 2 x Npoints
+% nViews = 2;
+% points = cell(nViews,1);
+% descr = cell(nViews,1);
+% % Descriptors
+% for i = 1:nViews
+%   [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
+%   points{i} = points{i}(1:2,:);
+% end
+% 
+% % Matches
+% matches = cell(nViews-1,1);
+% for i = 1:nViews-1
+%   matches{i} = siftmatch(descr{i}, descr{i+1});
+% end
 
 % Run the Factorization method to retrieve Pproj and Xproj
 [Pproj, Xproj] = factorization_method(matches, points, 'SturmAndTriggs');

@@ -1,4 +1,4 @@
-function [F, idx_inliers] = ransac_fundamental_matrix(x1, x2, th)
+function [F, idx_inliers, e12, e21] = ransac_fundamental_matrix(x1, x2, th)
 
 [Ncoords, Npoints] = size(x1);
 
@@ -10,7 +10,7 @@ p = 0.999;
 while it < max_it
     
     points = randomsample(Npoints, 8);
-    F = fundamental_matrix(x1(:,points), x2(:,points));
+    [F,~,~] = fundamental_matrix(x1(:,points), x2(:,points));
     inliers = compute_inliers(F, x1, x2, th);
       
     % test if it is the best model so far
@@ -31,7 +31,7 @@ while it < max_it
 end
 
 % compute F from all the inliers
-F = fundamental_matrix(x1(:,best_inliers), x2(:,best_inliers));
+[F, e12, e21] = fundamental_matrix(x1(:,best_inliers), x2(:,best_inliers));
 idx_inliers = best_inliers;
 
 
