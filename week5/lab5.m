@@ -280,8 +280,20 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 %       upgrades the projective reconstruction to an affine reconstruction
 % Compute plane at infinity as intersection of 3 lines (v1, v2, v3) for
 % image 1 and, v1p, v2p and v3p in image 2.
-p_inf = cross(cross(v1,v2),v3);
-p_infp = cross(cross(v1p,v2p),v3p);
+
+Xv1 = triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+Xv2 = triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+Xv3 = triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
+
+% Solve Ap = 0 ==> p is the null vector of A ==> SVD and pick last column
+% (eigenvectors associated to lowest eigenvalue)
+A = [Xv1'; Xv2'; Xv3'];
+[~,~,V] = svd(A);
+p = V(:,end);
+p = p / p(end);
+
+Hp = eye(4,4);
+Hp(4,:) = p';
 
 %% check results
 
