@@ -262,7 +262,10 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
 % ToDo: use the vanishing points to compute the matrix Hp that
 %       upgrades the projective reconstruction to an affine reconstruction
-
+% Compute plane at infinity as intersection of 3 lines (v1, v2, v3) for
+% image 1 and, v1p, v2p and v3p in image 2.
+p_inf = cross(cross(v1,v2),v3);
+p_infp = cross(cross(v1p,v2p),v3p);
 
 %% check results
 
