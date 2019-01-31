@@ -3,7 +3,8 @@
 
 
 addpath('../sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
-
+clearvars
+close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 0. Create synthetic data
@@ -96,6 +97,7 @@ for i = 1:length(X)
 end;
 axis equal;
 axis vis3d;
+title('Scene vertices as 3D point cloud')
 
 %% visualize as lines
 figure;
@@ -137,6 +139,7 @@ axis vis3d
 axis equal
 plot_camera2(P1,w,h);
 plot_camera2(P2,w,h);
+title('3D scene with lines')
 
 %% Create homogeneous coordinates
 
@@ -184,16 +187,21 @@ x_d{2} = euclid(P2*Xh);
 
 % image 1
 figure;
+subplot(1,2,1);
 hold on
 plot(x_d{1}(1,:),x_d{1}(2,:),'r*');
 plot(x_proj{1}(1,:),x_proj{1}(2,:),'bo');
 axis equal
+hold off
+title('Projected points on View1')
 
 % image 2
-figure;
+subplot(1,2,2);
 hold on
 plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
+hold off
+title('Projected points on View2')
 
 proj_error = [x_d{1} - x_proj{1} x_d{2} - x_proj{2}];
 proj_error = proj_error.^2;
@@ -248,8 +256,7 @@ plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
 plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
-
-
+title('3D scene projective reconstructed')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Affine reconstruction (synthetic data)
