@@ -341,7 +341,7 @@ title('3D scene affine rectified')
 %% 3. Metric reconstruction (synthetic data)
 
 % ToDo: compute the matrix Ha that
-%       upgrades the projective reconstruction to an affine reconstruction
+%       upgrades the affine reconstruction to a metric reconstruction
 % Use the following vanishing points given by three pair of orthogonal lines
 % and assume that the skew factor is zero and that pixels are square
 
