@@ -195,6 +195,13 @@ hold on
 plot(x_d{2}(1,:),x_d{2}(2,:),'r*');
 plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
 
+proj_error = [x_d{1} - x_proj{1} x_d{2} - x_proj{2}];
+proj_error = proj_error.^2;
+proj_error = sum(proj_error(:));
+
+msj = sprintf('Error on projecting points: %g', proj_error);
+disp(msj);
+assert(proj_error < 1e-18, 'Error projected data points is not very low')
 
 %% Visualize projective reconstruction
 Xaux(1,:) = Xproj(1,:)./Xproj(4,:);
