@@ -24,7 +24,7 @@ Xi = [10 20 0]';
 X = [X Xi];
 Xi = [30 0 10]';  % left facade
 X = [X Xi];
-Xi = [30 0 0]'; 
+Xi = [30 0 0]';
 X = [X Xi];
 Xi = [0 5 8]';   % middle squared window
 X = [X Xi];
@@ -92,7 +92,7 @@ figure; hold on;
 plot_camera2(P1,w,h);
 plot_camera2(P2,w,h);
 for i = 1:length(X)
-    scatter3(X(1,i), X(2,i), X(3,i), 5^2, [0.5 0.5 0.5], 'filled');
+  scatter3(X(1,i), X(2,i), X(3,i), 5^2, [0.5 0.5 0.5], 'filled');
 end;
 axis equal;
 axis vis3d;
@@ -163,39 +163,21 @@ x2(3,:) = x2(3,:)./x2(3,:);
 % This function returns an estimate of:
 %       Pproj: 3*Ncam x 4 matrix containing the camera matrices
 %       Xproj: 4 x Npoints matrix of homogeneous coordinates of 3D points
-% 
+%
 % As a convergence criterion you may compute the Euclidean
-% distance (d) between data points and projected points in both images 
+% distance (d) between data points and projected points in both images
 % and stop when (abs(d - d_old)/d) < 0.1 where d_old is the distance
 % in the previous iteration.
 
-%% ONLY FOR REAL IMAGES!
-% Compute keypoints and matches for all pairs of views
-% nViews = 2;
-% points = cell(nViews,1);
-% descr = cell(nViews,1);
-% % Descriptors
-% for i = 1:nViews
-%   [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
-%   points{i} = points{i}(1:2,:);
-% end
-% 
-% % Matches
-% matches = cell(nViews-1,1);
-% for i = 1:nViews-1
-%   matches{i} = siftmatch(descr{i}, descr{i+1});
-% end
-
-%% 
-points = [x1; x2];
+matches = [x1; x2];
 
 % Run the Factorization method to retrieve Pproj and Xproj
-[Pproj, Xproj] = factorization_method(points, 'SturmAndTriggs');
+[Pproj, Xproj] = factorization_method(matches, 'SturmAndTriggs');
 
 %% Check projected points (estimated and data points)
 
 for i=1:2
-    x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
+  x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
 end
 x_d{1} = euclid(P1*Xh);
 x_d{2} = euclid(P2*Xh);
@@ -264,7 +246,7 @@ axis equal
 %% 2. Affine reconstruction (synthetic data)
 
 % ToDo: create the function 'vanishing_point' that computes the vanishing
-% point formed by the line that joins points xo1 and xf1 and the line 
+% point formed by the line that joins points xo1 and xf1 and the line
 % that joins points x02 and xf2
 %
 % [v1] = vanishing_point(xo1, xf1, xo2, xf2)
@@ -278,7 +260,7 @@ v1p = vanishing_point(x2(:,21),x2(:,22),x2(:,23),x2(:,24));
 v2p = vanishing_point(x2(:,21),x2(:,23),x2(:,22),x2(:,24));
 v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 
-% ToDo: use the vanishing points to compute the matrix Hp that 
+% ToDo: use the vanishing points to compute the matrix Hp that
 %       upgrades the projective reconstruction to an affine reconstruction
 
 
@@ -326,7 +308,7 @@ axis equal
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Metric reconstruction (synthetic data)
 
-% ToDo: compute the matrix Ha that 
+% ToDo: compute the matrix Ha that
 %       upgrades the projective reconstruction to an affine reconstruction
 % Use the following vanishing points given by three pair of orthogonal lines
 % and assume that the skew factor is zero and that pixels are square
@@ -383,16 +365,66 @@ axis equal
 Irgb{1} = double(imread('Data/0000_s.png'))/255;
 Irgb{2} = double(imread('Data/0001_s.png'))/255;
 
-I{1} = sum(Irgb{1}, 3) / 3; 
+I{1} = sum(Irgb{1}, 3) / 3;
 I{2} = sum(Irgb{2}, 3) / 3;
 
 Ncam = length(I);
 
 % ToDo: compute a projective reconstruction using the factorization method
+% Compute keypoints and matches for all pairs of views
+points = cell(Ncam,1);
+descr = cell(Ncam,1);
+% Descriptors
+for i = 1:Ncam
+  [points{i}, descr{i}] = sift(I{i}, 'Threshold', 0.01);
+  points{i} = points{i}(1:2,:);
+end
+
+% Matches
+matches_mtx = [];
+for i = 1:Ncam-1
+  matches = siftmatch(descr{i}, descr{i+1});
+  x1 = points{i}(:, matches(1, :));
+  x2 = points{i+1}(:, matches(2, :));
+  matches_mtx = [matches_mtx; homog(x1); homog(x2)];
+end
+
+% Run the Factorization method to retrieve Pproj and Xproj
+[Pproj, Xproj] = factorization_method(matches_mtx, 'SturmAndTriggs');
 
 % ToDo: show the data points (image correspondences) and the projected
 % points (of the reconstructed 3D points) in images 1 and 2. Reuse the code
 % in section 'Check projected points' (synthetic experiment).
+
+% Check projected points (estimated and data points)
+for i=1:Ncam
+  x_proj{i} = euclid(Pproj(3*i-2:3*i, :)*Xproj);
+end
+
+% Note: ideally this should be generalised to Ncam views
+figure('Name', 'View 1: correspondences vs reconstructed 3D points');
+imshow(Irgb{1},[]);
+hold on;
+% Plot matches
+x1 = euclid(matches_mtx(1:3,:));  % Added 'euclid' to be formal, matches(1:2,:)
+
+plot(x1(1,:), x1(2,:), 'r*');
+plot(x_proj{1}(1,:),x_proj{1}(2,:),'bo');
+axis equal
+hold off;
+
+figure('Name', 'View 2: correspondences vs reconstructed 3D points');
+imshow(Irgb{2},[]);
+hold on;
+
+% Plot matches
+x2 = euclid(matches_mtx(4:6,:));  % will do the same since the third row=1
+
+plot(x2(1,:), x2(2,:), 'r*');
+plot(x_proj{2}(1,:),x_proj{2}(2,:),'bo');
+axis equal
+hold off;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 5. Affine reconstruction (real data)
@@ -400,7 +432,7 @@ Ncam = length(I);
 % ToDo: compute the matrix Hp that updates the projective reconstruction
 % to an affine one
 %
-% You may use the vanishing points given by function 'detect_vps' that 
+% You may use the vanishing points given by function 'detect_vps' that
 % implements the method presented in Lezama et al. CVPR 2014
 % (http://dev.ipol.im/~jlezama/vanishing_points/)
 
@@ -429,7 +461,7 @@ Xe = euclid(Hp*Xm);
 figure; hold on;
 [w,h] = size(I{1});
 for i = 1:length(Xe)
-    scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
+  scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
 end;
 axis equal;
 
@@ -442,7 +474,7 @@ axis equal;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Projective reconstruction from two views
 
-% ToDo: compute a projective reconstruction from the same two views 
+% ToDo: compute a projective reconstruction from the same two views
 % by computing two possible projection matrices from the fundamental matrix
 % and one of the epipoles.
 % Then update the reconstruction to affine and metric as before (reuse the code).
@@ -450,16 +482,16 @@ axis equal;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 8. OPTIONAL: Projective reconstruction from more than two views
 
-% ToDo: extend the function that computes the projective reconstruction 
-% with the factorization method to the case of three views. You may use 
+% ToDo: extend the function that computes the projective reconstruction
+% with the factorization method to the case of three views. You may use
 % the additional image '0002_s.png'
 % Then update the reconstruction to affine and metric.
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% 9. OPTIONAL: Any other improvement you may incorporate 
+%% 9. OPTIONAL: Any other improvement you may incorporate
 
-% Add a 4th view, incorporate new 3D points by triangulation, 
-% incorporate new views by resectioning, 
+% Add a 4th view, incorporate new 3D points by triangulation,
+% incorporate new views by resectioning,
 % apply any kind of processing on the point cloud, ...)
 
