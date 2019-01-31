@@ -209,6 +209,8 @@ Xaux(2,:) = Xproj(2,:)./Xproj(4,:);
 Xaux(3,:) = Xproj(3,:)./Xproj(4,:);
 X=Xaux;
 
+% Note: result has a projective ambiguity (is up to a projective
+% transformation)
 figure;
 hold on;
 X1 = X(:,1); X2 = X(:,2); X3 = X(:,3); X4 = X(:,4);
