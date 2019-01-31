@@ -67,7 +67,8 @@ K = [709 0 450; 0 709 300; 0 0 1];
 Rz = [cos(0.88*pi/2) -sin(0.88*pi/2) 0; sin(0.88*pi/2) cos(0.88*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
 R1 = Rz*Ry;
-t1 = -R1*[40; 10; 5];
+% t1 = -R1*[40; 10; 5];
+t1 = -R1*[42; 5; 10];
 
 Rz = [cos(0.8*pi/2) -sin(0.8*pi/2) 0; sin(0.8*pi/2) cos(0.8*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
@@ -349,6 +350,44 @@ v1 = vanishing_point(x1(:,2),x1(:,5),x1(:,3),x1(:,6));
 v2 = vanishing_point(x1(:,1),x1(:,2),x1(:,3),x1(:,4));
 v3 = vanishing_point(x1(:,1),x1(:,4),x1(:,2),x1(:,3));
 
+w = inv(K)'*inv(K);
+assert(w(1,2) == 0, 'Camera has non-zero skew')
+assert(w(1,1) == w(2,2), 'Pixels are not square')
+
+% Change nomenclature to match the one in lectures
+u = v1;
+v = v2;
+z = v3;
+
+A = [
+  u(1)*v(1), u(1)*v(2) + u(2)*v(1), u(1)*v(3) + u(3)*v(1), u(2)*v(2), u(2)*v(3)+u(3)*v(2), u(3)*v(3);
+  u(1)*z(1), u(1)*z(2) + u(2)*z(1), u(1)*z(3) + u(3)*z(1), u(2)*z(2), u(2)*z(3)+u(3)*z(2), u(3)*z(3);
+  v(1)*z(1), v(1)*z(2) + v(2)*z(1), v(1)*z(3) + v(3)*z(1), v(2)*z(2), v(2)*z(3)+v(3)*z(2), v(3)*z(3);
+  0 1 0 0 0 0;
+  1 0 0 -1 0 0;
+  ];
+
+[~,~,V] = svd(A);
+w_v = V(:,end);
+w_v = w_v / w_v(end);
+w = [ w_v(1) w_v(2) w_v(3); 
+      w_v(2) w_v(4) w_v(5); 
+      w_v(3) w_v(5) w_v(6) ];
+
+P = Pproj(4:6,:);
+M = P(1:3,1:3);
+A = chol(inv(M' * w * M));
+
+% Build Ha
+Ha = zeros(4,4);
+Ha(4, 4) = 1;
+Ha(1:3,1:3) = inv(A);
+
+% in case you don't get a positive definite matrix in the metric 
+% reconstruction in the synthetic case please change the translation 
+% vector of the first camera to this new one:  t1 = -R1*[42; 5; 10];
+
+
 %% check results
 
 Xa = euclid(Ha*Hp*Xproj);
@@ -389,6 +428,7 @@ plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
 plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
+title('3D scene metric rectified');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Projective reconstruction (real data)
