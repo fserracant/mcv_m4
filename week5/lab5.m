@@ -3,6 +3,9 @@
 
 
 addpath('../sift'); % ToDo: change 'sift' to the correct path where you have the sift functions
+addpath('../vanishing_points_v0.9');
+addpath('../vanishing_points_v0.9/lib');
+addpath('../vanishing_points_v0.9/mex_files');
 clearvars
 close all
 
@@ -377,12 +380,12 @@ w = [ w_v(1) w_v(2) w_v(3);
 
 P = Pproj(4:6,:);
 M = P(1:3,1:3);
-A = chol(inv(M' * w * M));
+%A = chol(inv(M' * w * M));
 
 % Build Ha
 Ha = zeros(4,4);
 Ha(4, 4) = 1;
-Ha(1:3,1:3) = inv(A);
+%Ha(1:3,1:3) = inv(A);
 
 % in case you don't get a positive definite matrix in the metric 
 % reconstruction in the synthetic case please change the translation 
