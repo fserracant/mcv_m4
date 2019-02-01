@@ -72,8 +72,8 @@ Rz = [cos(0.88*pi/2) -sin(0.88*pi/2) 0; sin(0.88*pi/2) cos(0.88*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
 R1 = Rz*Ry;
 % Use the t1 that generates a positive definite matrix on Part 3
-% t1 = -R1*[40; 10; 5];   
-t1 = -R1*[42; 5; 10];
+t1 = -R1*[40; 10; 5];   
+%t1 = -R1*[42; 5; 10];
 
 Rz = [cos(0.8*pi/2) -sin(0.8*pi/2) 0; sin(0.8*pi/2) cos(0.8*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
@@ -100,7 +100,7 @@ plot_camera2(P1,w,h);
 plot_camera2(P2,w,h);
 for i = 1:length(X)
   scatter3(X(1,i), X(2,i), X(3,i), 5^2, [0.5 0.5 0.5], 'filled');
-end;
+end
 axis equal;
 axis vis3d;
 title('Scene vertices as 3D point cloud')
@@ -287,19 +287,7 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 % Compute plane at infinity as intersection of 3 lines (v1, v2, v3) for
 % image 1 and, v1p, v2p and v3p in image 2.
 
-Xv1 = triangulate(euclid(v1), euclid(v1p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
-Xv2 = triangulate(euclid(v2), euclid(v2p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
-Xv3 = triangulate(euclid(v3), euclid(v3p), Pproj(1:3,:), Pproj(4:6,:), [h,w]);
-
-% Solve Ap = 0 ==> p is the null vector of A ==> SVD and pick last column
-% (eigenvectors associated to lowest eigenvalue)
-A = [Xv1'; Xv2'; Xv3'];
-[~,~,V] = svd(A);
-p = V(:,end);
-p = p / p(end);
-
-Hp = eye(4,4);
-Hp(4,:) = p';
+[Hp] = affineReprojection(v1,v1p,v2,v2p,v3,v3p,Pproj,w,h);
 
 %% check results
 
@@ -444,6 +432,8 @@ Irgb{2} = double(imread('Data/0001_s.png'))/255;
 I{1} = sum(Irgb{1}, 3) / 3;
 I{2} = sum(Irgb{2}, 3) / 3;
 
+[h,w] = size(I{1});
+
 Ncam = length(I);
 
 % ToDo: compute a projective reconstruction using the factorization method
@@ -517,29 +507,59 @@ hold off;
 
 img_in =  'Data/0000_s.png'; % input image
 folder_out = 'output'; % output folder
+% Common parameters to all images
 manhattan = 1;
 acceleration = 0;
 focal_ratio = 1;
 params.PRINT = 1;
 params.PLOT = 1;
+folder_root = 'computedVps';
+
+% Compute vanishing points for image 1
+img_in =  'Data/0000_s.png'; % input image
+folder_name = strcat(img_in(end-10:end-4),'/'); % image name
+folder_out = fullfile(folder_root, folder_name);
+% Create directory if it does not exist
+if ~isfolder(folder_out)
+  mkdir(folder_out);
+end
+
 [horizon, VPs] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
 
 
-%% Visualize the result
+% Compute vanishing points for image 1
+img_in =  'Data/0001_s.png'; % input image
+folder_name = strcat(img_in(end-10:end-4),'/'); % image name
+folder_out = fullfile(folder_root, folder_name);
+% Create directory if it does not exist
+if ~isfolder(folder_out)
+  mkdir(folder_out);
+end
 
+[horizon2, VPs2] = detect_vps(img_in, folder_out, manhattan, acceleration, focal_ratio, params);
+
+
+% Compute Hp that updates the projective reconstruction to an affine one.
+[Hp] = affineReprojection(VPs(:,1), VPs2(:,1), VPs(:,2), VPs2(:,2), ...
+  VPs(:,3), VPs2(:,3), Pproj, w, h);
+
+%% Visualize the result
 % x1m are the data points in image 1
 % Xm are the reconstructed 3D points (projective reconstruction)
+
+x1m = x1;
+Xm = Xproj;
 
 r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
 Xe = euclid(Hp*Xm);
 figure; hold on;
-[w,h] = size(I{1});
 for i = 1:length(Xe)
   scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
-end;
+end
 axis equal;
+title('3D scene affine rectified (sparse point cloud)');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. Metric reconstruction (real data)
