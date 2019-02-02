@@ -72,8 +72,8 @@ Rz = [cos(0.88*pi/2) -sin(0.88*pi/2) 0; sin(0.88*pi/2) cos(0.88*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
 R1 = Rz*Ry;
 % Use the t1 that generates a positive definite matrix on Part 3
-%t1 = -R1*[40; 10; 5];   
-t1 = -R1*[42; 5; 10];
+t1 = -R1*[40; 10; 5];   
+%t1 = -R1*[42; 5; 10];
 
 Rz = [cos(0.8*pi/2) -sin(0.8*pi/2) 0; sin(0.8*pi/2) cos(0.8*pi/2) 0; 0 0 1];
 Ry = [cos(0.88*pi/2) 0 sin(0.88*pi/2); 0 1 0; -sin(0.88*pi/2) 0 cos(0.88*pi/2)];
@@ -91,13 +91,13 @@ P2(1:3,1:3) = R2;
 P2(:,4) = t2;
 P2 = K*P2;
 
-w = 900;
-h = 600;
+width = 900;
+height = 600;
 
 % visualize as point cloud
 figure; hold on;
-plot_camera2(P1,w,h);
-plot_camera2(P2,w,h);
+plot_camera2(P1,width,height);
+plot_camera2(P2,width,height);
 for i = 1:length(X)
   scatter3(X(1,i), X(2,i), X(3,i), 5^2, [0.5 0.5 0.5], 'filled');
 end
@@ -143,9 +143,13 @@ plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
 plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
-plot_camera2(P1,w,h);
-plot_camera2(P2,w,h);
+plot_camera2(P1,width,height);
+plot_camera2(P2,width,height);
 title('3D scene with lines')
+xlabel('x-axis'); ylabel('y-axis'); zlabel('z-axis');
+x_lim = xlim;
+y_lim = ylim;
+z_lim = zlim;
 
 %% Create homogeneous coordinates
 
@@ -287,7 +291,7 @@ v3p = vanishing_point(x2(:,1),x2(:,2),x2(:,4),x2(:,3));
 % Compute plane at infinity as intersection of 3 lines (v1, v2, v3) for
 % image 1 and, v1p, v2p and v3p in image 2.
 
-[Hp] = affineReprojection(v1,v1p,v2,v2p,v3,v3p,Pproj,w,h);
+[Hp] = affineReprojection(v1,v1p,v2,v2p,v3,v3p,Pproj,width,height);
 
 %% check results
 
@@ -348,6 +352,7 @@ assert(w(1,2) == 0, 'Camera has non-zero skew')
 assert(w(1,1) == w(2,2), 'Pixels are not square')
 
 [Ha] = metricReprojection(v1,v2,v3,Pproj,Hp);
+%[Ha] = metricReprojection2(v1,v2,v3,Pproj,Hp);
 
 %% check results
 
@@ -390,6 +395,7 @@ plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
 title('3D scene metric rectified');
+xlabel('x-axis'); ylabel('y-axis'); zlabel('z-axis');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Projective reconstruction (real data)
@@ -401,7 +407,7 @@ Irgb{2} = double(imread('Data/0001_s.png'))/255;
 I{1} = sum(Irgb{1}, 3) / 3;
 I{2} = sum(Irgb{2}, 3) / 3;
 
-[h,w] = size(I{1});
+[height,width] = size(I{1});
 
 Ncam = length(I);
 
@@ -510,7 +516,7 @@ end
 
 % Compute Hp that updates the projective reconstruction to an affine one.
 [Hp] = affineReprojection(VPs(:,1), VPs2(:,1), VPs(:,2), VPs2(:,2), ...
-  VPs(:,3), VPs2(:,3), Pproj, w, h);
+  VPs(:,3), VPs2(:,3), Pproj, width, height);
 
 %% Visualize the result
 % x1m are the data points in image 1

@@ -1,5 +1,5 @@
 function [Ha] = metricReprojection(v1,v2,v3,Pproj,Hp)
-% METRICEPROJECTION computes the homography Ha that transforms a
+% METRICPROJECTION computes the homography Ha that transforms a
 % affine image into a metric one.
 % It works by mapping by finding the absolute conic in one of the images
 %
@@ -36,9 +36,9 @@ w = [ w_v(1) w_v(2) w_v(3);
       w_v(2) w_v(4) w_v(5); 
       w_v(3) w_v(5) w_v(6) ];
 
-P = Pproj(4:6,:);
+P = Pproj(1:3,:)*inv(Hp);
 M = P(1:3,1:3);
-A = chol(inv(M' * w * M));
+A = inv(chol(M' * w * M));
 
 % Build Ha
 Ha = zeros(4,4);
