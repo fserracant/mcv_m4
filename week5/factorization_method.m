@@ -42,6 +42,7 @@ if strcmpi(lambda_init, 'SturmAndTriggs')
   %TODO: first naive implementation, naïve loops for all views and all points
   lambda = ones(Ncam, Npoints);  % Lambda for the first view is 1
   iref = 1;
+  
   for i = 2:Ncam
     xref = xh_norm(3*iref-2:3*iref, :);
     xi = xh_norm(3*i-2:3*i, :);
@@ -52,7 +53,9 @@ if strcmpi(lambda_init, 'SturmAndTriggs')
       xrp = xref(:,p);
       xip = xi(:,p);
       cross_eri_xip = cross(eri, xip);
-      lambda(i,p) = lambda(iref,p) * abs((xrp' * Fri * cross_eri_xip)/(cross_eri_xip' * cross_eri_xip));
+      lambda(i,p) = lambda(iref,p) * ...
+        abs((xrp' * Fri * cross_eri_xip) /...
+        (cross_eri_xip' * cross_eri_xip));
     end
     iref = i;  % Update reference image.
   end
@@ -63,15 +66,22 @@ else
   error('Non-valid weight-initialization method. ''ones'' or ''sturm'' are allowed\n');
 end
 
+dist = inf;
+iteration_number = 0;
+convergence_threshold = 1e-6;
 converged = false;
-d = 1000;
+
 while ~converged
+  iteration_number = iteration_number+1;
+  sprintf('iteration: %d', iteration_number)
   
   p_norm = 1;  % Norm used
   % Normalise columns and rows twice
-  lambda = rescaleLambda(lambda, p_norm);
+  lambda = rescaleUntilConvergence(lambda, p_norm, 1e-9);
+  
   
   W_b = zeros(3*Ncam, Npoints);  % Define measurement matrix W
+
   for i = 1:Ncam
     W_b(3*i-2:3*i,:) = lambda(i,:) .* xh_norm(3*i-2:3*i,:);
   end
@@ -91,10 +101,10 @@ while ~converged
   X_hat = Sigma_pp * V(:,1:4)';
   
   % Compute reprojection error
-  d_old = d;
+  dist_old = dist;
   % Euclidean distance, make sure that we are using Euclidean coordinates!
-  d = sum(sqrt(sum((xh_norm - (P_hat * X_hat)) .^2)));
-  converged = (abs(d - d_old) / d) < 0.1;
+  dist = sum(sqrt(sum((xh_norm - (P_hat * X_hat)) .^2)));
+  converged = (abs(dist - dist_old) / dist) < convergence_threshold;
   if ~converged
     % Update lambda
     xp = P_hat * X_hat;
@@ -116,27 +126,27 @@ end
 
 end
 
-function newLambda = rescaleLambda(lambda, p_norm)
-  maxIt = 5;
-
-  for i=1:maxIt
-    oldLambda = lambda;
-    lambda = lambda./vecnorm(lambda,p_norm,1);
-    converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
-    if converged
-      break;
-    end
-
-    oldLambda = lambda;
-    lambda = lambda./vecnorm(lambda,p_norm,2);
-    converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
-    
-    if converged
-      break;
-    end
-    
+function [lambda_r] = rescaleLambda(lambda, p_norm)
+  % Re-scale each column
+  lambda_r = lambda./vecnorm(lambda,p_norm,1);
+  
+  % Re-scale triplets of rows
+  for k = 1:3:size(lambda,1)-2
+    triplet = lambda_r(k:k+2, :);
+    lambda_r(k:k+2,:) = triplet ./ vecnorm(triplet(:), p_norm, 1);
   end
+end
 
-  newLambda = lambda;
-
+function [lambda_r] = rescaleUntilConvergence(lambda, p_norm, th)
+  tmp = lambda;
+  lambda_r = lambda;
+  convergence = false;
+  while ~convergence
+    tmp = rescaleLambda(lambda_r, p_norm);
+    sum(abs(lambda_r(:) - tmp(:)))
+    if sum(abs(lambda_r(:) - tmp(:))) < th
+      convergence = true;
+    end
+    lambda_r = tmp;
+  end
 end
