@@ -99,7 +99,7 @@ figure; hold on;
 plot_camera2(P1,width,height);
 plot_camera2(P2,width,height);
 for i = 1:length(X)
-  scatter3(X(1,i), X(2,i), X(3,i), 5^2, [0.5 0.5 0.5], 'filled');
+  scatter3(X(1,i), X(2,i), X(3,i), 2^2, [0.5 0.5 0.5], 'filled');
 end
 axis equal;
 axis vis3d;
@@ -333,7 +333,7 @@ plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
 plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
-title('3D scene affine rectified')
+title('3D scene affine reconstructed')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Metric reconstruction (synthetic data)
@@ -394,7 +394,7 @@ plot3([X5(1) X7(1)], [X5(2) X7(2)], [X5(3) X7(3)]);
 plot3([X6(1) X8(1)], [X6(2) X8(2)], [X6(3) X8(3)]);
 axis vis3d
 axis equal
-title('3D scene metric rectified');
+title('3D scene metric reconstructed');
 xlabel('x-axis'); ylabel('y-axis'); zlabel('z-axis');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -529,18 +529,42 @@ r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
 g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
 b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
 Xe = euclid(Hp*Xm);
-figure; hold on;
+h = [];
+h(1) = figure; hold on;
 for i = 1:length(Xe)
-  scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 2^2, [r(i) g(i) b(i)], 'filled');
+  scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 5^2, [r(i) g(i) b(i)], 'filled');
 end
 axis equal;
-title('3D scene affine rectified (sparse point cloud)');
+title('3D scene affine reconstructed (sparse point cloud)');
+xlabel('x-axis'); ylabel('y-axis'); zlabel('z-axis');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 6. Metric reconstruction (real data)
 
 % ToDo: compute the matrix Ha that updates the affine reconstruction
 % to a metric one and visualize the result in 3D as in the previous section
+% We need to select computed vanishing points that lie on orthogonal lines
+% In this case, the algorithm returns 3 VPs in the order: horizontal,
+% vertical, horizontal(2). 
+[Ha] = metricReprojection(homog(VPs(:,1)), homog(VPs(:,2)), homog(VPs(:,3)), Pproj, Hp);
+
+% x1m are the data points in image 1
+% Xm are the reconstructed 3D points (projective reconstruction)
+
+x1m = x1;
+Xm = Xproj;
+
+r = interp2(double(Irgb{1}(:,:,1)), x1m(1,:), x1m(2,:));
+g = interp2(double(Irgb{1}(:,:,2)), x1m(1,:), x1m(2,:));
+b = interp2(double(Irgb{1}(:,:,3)), x1m(1,:), x1m(2,:));
+Xe = euclid(Ha*Hp*Xm);
+h(2) = figure; hold on;
+for i = 1:length(Xe)
+  scatter3(Xe(1,i), Xe(2,i), Xe(3,i), 5^2, [r(i) g(i) b(i)], 'filled');
+end
+axis equal;
+title('3D scene metric reconstructed (sparse point cloud)');
+xlabel('x-axis'); ylabel('y-axis'); zlabel('z-axis');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 7. OPTIONAL: Projective reconstruction from two views
@@ -565,4 +589,3 @@ title('3D scene affine rectified (sparse point cloud)');
 % Add a 4th view, incorporate new 3D points by triangulation,
 % incorporate new views by resectioning,
 % apply any kind of processing on the point cloud, ...)
-

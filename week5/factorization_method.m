@@ -38,6 +38,7 @@ end
 if strcmpi(lambda_init, 'SturmAndTriggs')
   %we apply the same constraint as [Sturm96]: the images are taken
   %   pairwise in sequence, F12, F23, F34,..., Fm-1m
+  % oppositely to in 'parallel': F12, F13, F14,...
   
   %TODO: first naive implementation, naïve loops for all views and all points
   lambda = ones(Ncam, Npoints);  % Lambda for the first view is 1
