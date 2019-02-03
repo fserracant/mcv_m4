@@ -102,6 +102,7 @@ while ~converged
       lambda(i,:) = xp(3*i,:);
     end
   end
+  
 end
 
 Pproj = P_hat;
@@ -116,25 +117,26 @@ end
 end
 
 function newLambda = rescaleLambda(lambda, p_norm)
+  maxIt = 5;
 
-maxIt = 5;
-for i=1:maxIt
-  oldLambda = lambda;
-  lambda = lambda./vecnorm(lambda,p_norm,1);
-  converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
-  if converged
-    break;
-  end
-  
-  oldLambda = lambda;
-  lambda = lambda./vecnorm(lambda,p_norm,2);
-  converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
-  if converged
-    break;
-  end
-  
-end
+  for i=1:maxIt
+    oldLambda = lambda;
+    lambda = lambda./vecnorm(lambda,p_norm,1);
+    converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
+    if converged
+      break;
+    end
 
-newLambda = lambda;
+    oldLambda = lambda;
+    lambda = lambda./vecnorm(lambda,p_norm,2);
+    converged = (abs(sum(lambda(:) - oldLambda(:))) / sum(lambda(:))) < 0.1;
+    
+    if converged
+      break;
+    end
+    
+  end
+
+  newLambda = lambda;
 
 end
