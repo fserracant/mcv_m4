@@ -6,6 +6,7 @@ addpath('../sift'); % ToDo: change 'sift' to the correct path where you have the
 addpath('../vanishing_points_v0.9');
 addpath('../vanishing_points_v0.9/lib');
 addpath('../vanishing_points_v0.9/mex_files');
+mkdir('output');
 clearvars
 close all
 
@@ -437,7 +438,7 @@ title('3D scene metric rectified');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 4. Projective reconstruction (real data)
 
-%% read images
+% read images
 Irgb{1} = double(imread('Data/0000_s.png'))/255;
 Irgb{2} = double(imread('Data/0001_s.png'))/255;
 
@@ -516,7 +517,7 @@ hold off;
 % orthogonal lines in image 1
 
 img_in =  'Data/0000_s.png'; % input image
-folder_out = '.'; % output folder
+folder_out = 'output'; % output folder
 manhattan = 1;
 acceleration = 0;
 focal_ratio = 1;
