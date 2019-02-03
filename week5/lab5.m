@@ -381,17 +381,16 @@ w = [ w_v(1) w_v(2) w_v(3);
 
 P = Pproj(4:6,:);
 M = P(1:3,1:3);
-%A = chol(inv(M' * w * M));
+A = chol(inv(M' * w * M));
 
 % Build Ha
 Ha = zeros(4,4);
 Ha(4, 4) = 1;
-%Ha(1:3,1:3) = inv(A);
+Ha(1:3,1:3) = inv(A);
 
 % in case you don't get a positive definite matrix in the metric 
 % reconstruction in the synthetic case please change the translation 
 % vector of the first camera to this new one:  t1 = -R1*[42; 5; 10];
-
 
 %% check results
 
